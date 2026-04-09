@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수업-수강시간표</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/academy.css">
+    <link rel="stylesheet" href="../css/course-registration.css">
+</head>
+<body>
+    <header class="util-bar">
+        <div class="util-container">
+        <!-- 로고 영역 -->
+        <div class="logo-area">
+        <!-- 텍스트 로고 -->
+        <h1 class="text-logo"><a href="dashboard.html">보안대학교</a></h1>
+        <span class="portal-title">내 학사정보</span>
+        </div>
+        <!-- 서비스 링크 및 사용자 정보 -->
+        <div class="top-links">
+        <a href="#"><i class="fa-solid fa-map-location-dot"></i> 학사네비게이터</a>
+        <a href="#"><i class="fa-solid fa-laptop-code"></i> e클래스</a>
+        <a href="#"><i class="fa-solid fa-users-rectangle"></i> 취업포털</a>
+        <a href="#"><i class="fa-solid fa-file-invoice"></i> 증명</a>
+        <a href="#"><i class="fa-solid fa-house-chimney"></i> 생활관</a>
+        <a href="#"><i class="fa-solid fa-bell"></i> 통합알림</a>
+        <div class="lang-select">
+        <i class="fa-solid fa-globe"></i> LANGUAGE <i class="fa-solid fa-caret-down"></i>
+        </div>
+        <div class="user-info">
+        <strong id="header-user-info">정승현(213804)</strong>님 
+        <i class="fa-solid fa-circle-user"></i>
+        </div>
+        </div>
+        </div>
+    </header>
+        
+    <nav class="top-nav">
+            <ul class="main-menu">
+            <!-- ----- 학적 ----- -->
+            <li class="menu-item">
+            <a href="basic-info.html">학적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4><a class="nav-link" href="basic-info.html" id="basic-info">학적관리</a></h4>
+            <ul>
+            <li><a class="nav-link" href="basic-info.html" id="basic-info">기본정보변경</a></li>
+            <li><a class="nav-link" href="major.html" id="major">전공/교직</a></li>
+            </ul>
+            </div>
+            <div class="menu-column">
+                <h4><a class="nav-link" href="leave-apply.html" id="leave-apply">휴/복학</a></h4>
+                <ul>
+                <li><a class="nav-link" href="leave-apply.html" id="leave-apply">휴학신청</a></li>
+                <li><a class="nav-link" href="return-apply.html" id="return-apply">복학신청</a></li>
+                <li><a class="nav-link" href="change-major.html" id="change-major">전과신청</a></li>
+                <li><a class="nav-link" href="double-major.html" id="double-major">부/복수전공신청</a></li>
+                </ul>
+            </div>
+            </div>
+    
+            </li>
+            <!-- ----- 졸업 ----- -->
+            <li class="menu-item">
+            <a href="#">졸업</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>졸업자격확인</h4>
+            <ul>
+            <li>졸업소요학점</li>
+            <li>학부졸업자격확인</li>
+            <li>미리해본졸업사정</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 교육과정 ----- -->
+            <li class="menu-item">
+            <a href="#">교육과정</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>교육과정이수기준</h4>
+            <ul>
+            <li>교육과정이수기준</li>
+            <li>편입생이수기준</li>
+            <li>교육과정 적용 방법</li>
+            </ul>
+            </div>
+            <div class="menu-column">
+            <h4>교육과정조회</h4>
+            <ul>
+            <li>교양과목 조회</li>
+            <li>전공과목 조회</li>
+            <li>동일교과목 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 수업 ----- -->
+            <li class="menu-item">
+            <a href="class-table.html">수업</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>수강신청</h4>
+            <ul>
+            <li><a href="class-table.html">수강시간표</a></li>
+            <li><a href="#">수강신청바로가기</a></li>
+            <li><a class="nav-link" href="course-registration.html">수강신청내역</a></li>
+            </ul>
+            </div>
+            <div class="menu-column">
+            <h4>기타수업</h4>
+            <ul>
+            <li><a href="#">교과목조회</a></li>
+            </ul>
+            </div>
+            </div>
+            </li>
+
+            <!-- ----- 성적 ----- -->
+            <li class="menu-item">
+            <a href="#">성적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>성적조회</h4>
+            <ul>
+            <li><a class="nav-link" href="semester-grades.html">학기별 성적 조회</a></li>
+            <li>전체 성적 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 등록 ----- -->
+            <li class="menu-item">
+            <a href="#">등록</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>등록내역</h4>
+            <ul>
+            <li><a class="nav-link" href="tuition-history.html">등록내역 조회</a></li>
+            <li>등록금 영수증 출력</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 장학·복지 ----- -->
+            <li class="menu-item">
+            <a href="#">장학·복지</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>장학금</h4>
+            <ul>
+            <li>장학금 안내</li>
+            <li>장학금 신청</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            </ul>
+    </nav>
+    <!--좌측 사이드 바 영역-->
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-title">수업</div>
+
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    수강신청
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: block;">
+                    <li class="menu-item">
+                        <i class="fas fa-check-circle"></i> <a href="class-table.html">수강시간표</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-check-circle"></i> <a href="#">수강신청바로가기</a>
+                    </li>
+                    <li class="menu-item active">
+                        <i class="fas fa-graduation-cap"></i> <a href="course-registration.html">수강내역확인</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    기타수업
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: none;">
+                    <li class="menu-item">
+                        <i class="fas fa-pause-circle"></i> <a href="#">교과목조회</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    
+        <!-- 우측 콘텐츠 영역 -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- 상단 브레드크럼 -->
+                <div class="breadcrumb-nav">
+                    <span><a href="#">홈</a></span>
+                    <span class="separator">&gt;</span>
+                    <span><a href="#">학적</a></span>
+                    <span class="separator">&gt;</span>
+                    <span class="current">수강내역조회</span>
+                </div>
+            
+                <!-- 페이지 타이틀 -->
+                <div class="content-header">
+                    <h1>수강내역조회</h1>
+                </div>
+            
+                <!-- 메인 콘텐츠 -->
+                <div class="content-body">
+                    <!-- 현재학기 수강내역 카드 -->
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h2>2026학년도 1학기 수강과목</h2>
+                            <span class="semester-badge">진행중</span>
+                        </div>
+                        <div class="card-content">
+                            <table class="lecture-table">
+                                <thead>
+                                    <tr>
+                                        <th>교과목번호</th>
+                                        <th>과목명</th>
+                                        <th>학점</th>
+                                        <th>이수구분</th>
+                                        <th>교수명</th>
+                                        <th>강의시간</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>AGR3042</td>
+                                        <td>농업경제학특론</td>
+                                        <td>3</td>
+                                        <td><span class="badge-major">전공</span></td>
+                                        <td>김철수 교수</td>
+                                        <td>월, 수 10:00~11:30</td>
+                                    </tr>
+                                    <tr>
+                                        <td>AGR3051</td>
+                                        <td>국제농업통상</td>
+                                        <td>3</td>
+                                        <td><span class="badge-major">전공</span></td>
+                                        <td>박영희 교수</td>
+                                        <td>화, 목 14:00~15:30</td>
+                                    </tr>
+                                    <tr>
+                                        <td>AGR3067</td>
+                                        <td>농업정책론</td>
+                                        <td>3</td>
+                                        <td><span class="badge-major">전공</span></td>
+                                        <td>이준호 교수</td>
+                                        <td>월, 수 13:00~14:30</td>
+                                    </tr>
+                                    <tr>
+                                        <td>AGR2087</td>
+                                        <td>농업금융론</td>
+                                        <td>3</td>
+                                        <td><span class="badge-elective">교필</span></td>
+                                        <td>정명순 교수</td>
+                                        <td>수, 금 11:00~12:30</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+            
+                            <!-- 학기 요약 -->
+                            <div class="semester-summary">
+                                <div class="summary-item">
+                                    <span class="summary-label">신청학점</span>
+                                    <span class="summary-value">12</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">전공학점</span>
+                                    <span class="summary-value">9</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">선택학점</span>
+                                    <span class="summary-value">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+              
+        </main>
+    </div>
+</body>
+<script src="../js/academy.js"></script>
+</html>

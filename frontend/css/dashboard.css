@@ -1,0 +1,555 @@
+/* ==============================================================
+   1. 초기화 및 기본 설정 (Reset & Base)
+   ============================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #e5e5e5;          /* 페이지 전체 배경 */
+    overflow-x: hidden;
+    line-height: 1.4;
+}
+
+:root {
+    --brand-blue: #1B3B86;         /* 수안 블루 */
+    --brand-green: #377235;        /* 포인트 그린 */
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --border-light: #e0e0e0;
+    --container-width: 1200px;
+}
+
+/* 글로벌 유틸리티 컬러 강제 적용 */
+.date, .user-name, .more-btn, .text-logo {
+    color: var(--brand-blue) !important;
+}
+
+/* ==============================================================
+   2. 상단 유틸 바 (Util Bar - 로고/로그인 정보)
+   ============================================================== */
+.util-bar {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 0;
+}
+
+.util-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.text-logo {
+    font-weight: 900;
+    font-size: 22px;
+    margin: 0;
+}
+
+.portal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    border-left: 1px solid #ccc;
+    padding-left: 15px;
+}
+
+.top-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.top-links a, .user-info {
+    text-decoration: none;
+    color: var(--brand-blue);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-info strong {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+/* ==============================================================
+   3. 메인 내비게이션 (Sticky Nav & Mega Menu)
+   ============================================================== */
+.top-nav {
+    width: 100%;
+    background-color: var(--brand-blue);
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+
+.main-menu {
+    list-style: none;
+    display: flex;
+    width: 100%;
+    max-width: var(--container-width);
+}
+
+.menu-item {
+    flex: 1;
+    position: relative;
+    text-align: center;
+}
+
+.menu-item > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.menu-item:hover > a {
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 700;
+}
+
+/* 메가 서브메뉴 */
+.mega-menu {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    min-width: max-content;
+    background-color: #ffffff;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+    padding: 20px;
+    display: none;
+    text-align: left;
+    z-index: 10000;
+    gap: 30px;
+}
+
+.menu-item:hover .mega-menu {
+    display: flex;
+}
+
+.menu-column {
+    min-width: 140px;
+}
+
+.menu-column h4 {
+    font-size: 15px;
+    color: var(--brand-blue);
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--brand-blue);
+}
+
+.menu-column ul {
+    list-style: none;
+}
+
+.menu-column li {
+    font-size: 14px;
+    color: #555;
+    padding: 6px 0;
+}
+
+.menu-column ul li a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+}
+
+.menu-column ul li a:hover {
+    color: var(--brand-blue);
+    text-decoration: underline;
+}
+
+/* ==============================================================
+   4. 대시보드 상단 배너 (Dashboard Banner)
+   ============================================================== */
+.dashboard-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    width: var(--container-width);
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 25px 30px;
+    box-sizing: border-box;
+}
+
+/* 좌측: 날짜/날씨 */
+.banner-left {
+    flex: 0 0 160px;
+    border-right: 1px solid #ddd;
+    text-align: center;
+    padding-right: 20px;
+}
+
+.banner-left .today-label { font-size: 12px; color: #888; font-weight: bold; }
+.banner-left .date-day { font-size: 60px; margin: 0; line-height: 1; color: var(--brand-blue); font-weight: bold; }
+.banner-left .date-year-month { font-size: 14px; margin-top: 5px; color: var(--text-gray); }
+.banner-left .weather-box { font-size: 13px; margin: 10px 0; color: #555; }
+
+/* 중앙: 오늘 수업 시간표 */
+.banner-middle {
+    flex: 1;
+    padding: 0 40px;
+    border-right: 1px solid #ddd;
+    min-width: 0;
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.schedule-header h3 { font-size: 18px; margin: 0; }
+.more-link { font-size: 12px; color: #999; cursor: pointer; }
+.schedule-content { color: #888; font-size: 15px; }
+
+/* 우측: 내 프로필 */
+.banner-right {
+    flex: 0 0 300px;
+    padding-left: 20px;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid #f0f0f0;
+}
+
+/* 아이콘·텍스트 그룹 */
+.profile-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* 아이콘 */
+.profile-icon-wrapper i {
+    font-size: 50px;
+    color: #cbd5e0;
+}
+
+/* 텍스트 전체 컨테이너 */
+.profile-info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+/* ① 이름 */
+.user-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--brand-blue);
+    line-height: 1.2;
+}
+
+/* ② 학번 */
+.user-id {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+/* ③ 학년·재학·성별 */
+.user-sub-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;                    /* 항목 사이 간격 */
+    font-size: 11px;            /* 글씨 크기 감소 */
+    color: #666;
+    font-weight: 500;
+}
+.divider {
+    color: #e2e8f0;             /* 구분선 색상 (연하게) */
+    font-size: 10px;
+}
+
+/* ④ 전공 */
+.user-major {
+    font-size: 11px;
+    color: #4a5568;
+    font-weight: 600;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ==============================================================
+   5. 메인 그리드 및 요약 카드 (Summary Section)
+   ============================================================== */
+.summary-section {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px;
+    max-width: var(--container-width);
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.summary-card {
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.05);
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    grid-column: auto / auto !important;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 10px;
+}
+
+.card-header h3 {
+    font-size: 1.05rem;
+    color: var(--brand-blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 프로그레스 바 공통 */
+.progress-item { margin-bottom: 15px; }
+.progress-item .label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+.progress-bar { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; }
+.bar { height: 100%; background: var(--brand-blue); border-radius: 4px; }
+
+/* 리스트형 (공통) */
+.recommend-list, .notice-list { list-style: none; }
+.recommend-list li, .notice-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 13px;
+}
+
+.tag { font-size: 11px; color: #fff; padding: 2px 6px; border-radius: 3px; }
+.tag-blue { background: var(--brand-blue); }
+.tag-green { background: var(--brand-green); }
+.tag-orange { background: #e67e22; }
+
+/* 성적 요약 구역 전용 */
+.grade-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.grade-main .value { font-size: 20px; color: var(--brand-blue); }
+.grade-details { text-align: right; font-size: 12px; line-height: 1.6; }
+
+/* 자기계발활동기록부 스타일 */
+.activity-stats {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.stat-circle {
+    width: 65px;
+    height: 65px;
+    border: 3px solid var(--brand-blue);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #f0f4ff;
+    flex-shrink: 0;
+}
+
+.stat-circle .num { font-size: 18px; font-weight: 800; color: var(--brand-blue); line-height: 1; }
+.stat-circle .txt { font-size: 10px; color: #666; margin-top: 2px; }
+
+.stat-info { list-style: none; flex: 1; }
+.stat-info li {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #4a5568;
+    background: #f8f9fa;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+.stat-info li strong { color: var(--brand-blue); float: right; }
+
+/* 수업/성적 요약 (출석 바 포함) */
+.attendance-mini {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px dashed #e1e4e8;
+}
+
+.attendance-mini span { font-size: 12px; color: #718096; white-space: nowrap; }
+
+.mini-bar-container {
+    flex: 1;
+    height: 8px;
+    background: #edf2f7;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mini-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-blue), #5a8dee);
+    border-radius: 4px;
+}
+
+.attendance-mini .percent {
+    font-weight: 700;
+    color: var(--brand-blue);
+    min-width: 30px;
+}
+
+/* 등록/장학 현황 스타일 */
+.payment-status {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8faff;
+    border-radius: 8px;
+    border-left: 4px solid var(--brand-blue);
+}
+
+.status-item .title { font-size: 13px; font-weight: 600; color: #2d3748; }
+
+.badge-complete {
+    background: var(--brand-blue);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.scholar-item {
+    text-align: right;
+    padding-right: 5px;
+}
+
+.scholar-item p { font-size: 12px; color: #718096; margin-bottom: 5px; }
+.scholar-item strong {
+    font-size: 18px;
+    color: #e67e22; /* 포인트 색상 */
+    letter-spacing: -0.5px;
+}
+
+/* 주요 학사공지 (날짜 정렬) */
+.notice-list .date {
+    font-size: 12px;
+    color: #a0aec0;
+    font-weight: 500;
+    margin-right: 5px;
+    min-width: 35px;
+}
+
+/* ==============================================================
+   6. 기타 컴포넌트 (Banners, Badges, etc.)
+   ============================================================== */
+.badge-complete {
+    background: #e3f2fd;
+    color: var(--brand-blue);
+    border: 1px solid var(--brand-blue);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.qna-btn {
+    background-color: var(--brand-blue);
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* ==============================================================
+   7. 반응형 설정 (Responsive)
+   ============================================================== */
+@media (max-width: 1024px) {
+    .summary-section { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 768px) {
+    .summary-section { grid-template-columns: 1fr !important; }
+    .dashboard-banner { flex-direction: column; height: auto; }
+    .banner-left, .banner-middle { border-right: none; border-bottom: 1px solid #ddd; padding: 20px 0; }
+}
+
+/* 링크를 일반 텍스트처럼 보이게 함 */
+.plain-link {
+    text-decoration: none;   /* 밑줄 없앰 */
+    color: inherit;          /* 부모 색(보통 검정) 그대로 사용 */
+    cursor: default;         /* 화살표(기본 커서) – 클릭임을 힌트 안 줌 */
+}
+
+/* 혹시 브라우저가 :focus 스타일을 적용한다면 같이 없애 주세요 */
+.plain-link:focus,
+.plain-link:active,
+.plain-link:hover {
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+}

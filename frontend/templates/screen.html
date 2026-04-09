@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보안대학교 포털</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <ul class="nav-bar__links">
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-book fa-lg"></i>
+                <a href="#">도서관</a>
+            </li>
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-rocket fa-lg"></i>
+                <a href="#">취업진로</a>
+            </li>
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-font-awesome fa-lg"></i>
+                <a href="#">교수-학습</a>
+            </li>
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-envelope fa-lg"></i>
+                <a href="#">학생메일</a>
+                <span>|</span>
+            </li>
+
+            <li class="nav-bar__icon">
+                <i class="fa-regular fa-user fa-lg"></i>
+                <a href="#">나의정보</a>
+            </li>
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-globe fa-lg"></i>
+                <a href="#">English</a>
+            </li>
+            <li class="nav-bar__icon">
+                <i class="fa-solid fa-arrow-right-from-bracket fa-lg"></i>
+                <a href="login.html">로그아웃</a>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="screen-header">
+        <h1 class="screen-header__logo">한국대학<span class="screen-header__special">포털</span> 
+            <span class="screen-header__logosub">Hankuk NATIONAL UNIVERSITY PORTAL</span>
+        </h1>
+        <div class="screen-header__links">
+            <span class="screen-header__help">
+                <a href="">교육지원</a>
+                <i class="fa-solid fa-angle-down"></i>
+            </span>
+            <span class="screen-header__help">
+                <a href="">게시판</a>
+            </span>
+            <span class="screen-header__help">
+                <a href="">커뮤니케이션</a>
+                <i class="fa-solid fa-angle-down"></i>
+            </span>
+            <span class="screen-header__help">
+                <a href="">서비스데스크</a>
+                <i class="fa-solid fa-angle-down"></i>
+            </span>
+        </div>
+    </header>
+        <!-- 메인 컨텐츠 영역 시작 (가운데 정렬을 위해 container 사용) -->
+    <main class="main-container">
+
+        <section id="hero-section" class="hero-container">
+            <!-- 1. 포스터 슬라이더 (왼쪽: 가변 폭) -->
+            <div id="hero-poster" class="poster-view">
+              <!-- 도트 인디케이터 (필요 시 포스터 하단에 배치) -->
+              <div class="dots-container">
+                <span class="dot active" data-index="0" onclick="currentSlide(0)"></span>
+                <span class="dot" data-index="1" onclick="currentSlide(1)"></span>
+                <span class="dot" data-index="2" onclick="currentSlide(2)"></span>
+                <span class="dot" data-index="3"></span>
+              </div>
+            </div>
+          
+            <!-- 2. 유저 정보 카드 (오른쪽: 고정 폭) -->
+            <aside class="user-sidebar">
+              <div class="user-info-card">
+                <div class="user-profile">
+                  <i class="fas fa-user-circle"></i>
+                  <div class="user-text">
+                    <span class="department">농업경제학과</span>
+                    <span class="user-name"><strong>허정안</strong> (211768)</span>
+                  </div>
+                </div>
+                <div class="user-actions">
+                  <button><i class="fas fa-book"></i> 내 강의실</button>
+                  <button><i class="fas fa-envelope"></i> 쪽지함</button>
+                </div>
+              </div>
+            </aside>
+          </section>
+
+    <!-- 2. HOT NEWS 섹션 -->
+    <section class="hot-news-bar">
+        <div class="news-label">
+            <i class="fa-solid fa-heart"></i> HOT NEWS
+        </div>
+        <div class="news-content" id="hot-news-container">
+            <a href="#" id="hot-news-text">2026학년도 1학기 행정업무보조 국가근로장학생 희망근로기관 신청 안내</a>
+        </div>
+        <div class="news-controls">
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- 3. MY PORTAL 섹션 -->
+    <section class="my-portal-section">
+        <div class="portal-header-bar">
+            <span class="title"><i class="fa-solid fa-star"></i> MY PORTAL</span>
+            <span class="setup-icon"><i class="fa-solid fa-gear"></i></span>
+        </div>
+        
+        <div class="portal-grid">
+            <a href="#" class="portal-item color-navy">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>내학사행정</p>
+            </a>
+            <a href="#" class="portal-item color-blue">
+                <i class="fa-solid fa-comments"></i>
+                <p>묻고답하기</p>
+            </a>
+            <a href="#" class="portal-item color-red">
+                <i class="fa-solid fa-clipboard-user"></i>
+                <p>자계부·상담</p>
+            </a>
+            <a href="#" class="portal-item color-indigo">
+                <i class="fa-solid fa-laptop-code"></i>
+                <p>e클래스</p>
+            </a>
+            <a href="#" class="portal-item color-green">
+                <i class="fa-solid fa-seedling"></i>
+                <p>성장마루<br><small>비교과통합플랫폼</small></p>
+            </a>
+            <a href="#" class="portal-item color-orange">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <p>Office 365</p>
+            </a>
+        </div>
+
+        <!-- 하단 즐겨찾기 플러스 베이스 -->
+        <div class="portal-favorites">
+            <div class="fav-slot"><i class="fa-solid fa-plus"></i></div>
+            <div class="fav-slot"><i class="fa-solid fa-plus"></i></div>
+            <div class="fav-slot"><i class="fa-solid fa-plus"></i></div>
+            <div class="fav-slot"><i class="fa-solid fa-plus"></i></div>
+            <div class="fav-slot"><i class="fa-solid fa-plus"></i></div>
+        </div>
+    </section>
+
+<!--공지사항, 학사 일정-->
+<div class="nofi-serv_content">
+    <div class="nofi_container">
+    <section class="notice-section">
+        <div class="notice-section__box">
+            <div class="notice-section__box-top">
+                <div class="notice-section__title">
+                    <h1>단과대학 공지</h1>
+                </div>
+                <div class="notice-section__plus">
+                    <span>더보기</span>
+                    <i class="fa-regular fa-square-plus"></i>
+                </div>
+            </div>
+            <ul class="notice-section__content">
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">운해장학재단 2026년 제 13기 운해장학생 선발 안내</span>
+                    <span>2025.12.02</span> 
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 대한민국산지직송 CI BI 디자인 공모전 안내</span>
+                    <span>2025.11.24</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2025년 미래성장 장학생 선발 안내</span>
+                    <span>2025.11.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 한국지도자육성장학재단 장학생 선발 안내</span> 
+                    <span>2025.10.20</span>
+                </li>
+            </ul>
+        </div>
+        <div class="notice-section__box">
+            <div class="notice-section__box-top">
+                <div class="notice-section__title">
+                    <h1>학부 공지</h1>
+                </div>
+                <div class="notice-section__plus">
+                    <span>더보기</span>
+                    <i class="fa-regular fa-square-plus"></i>
+                </div>
+            </div>
+                
+            <ul class="notice-section__content">
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 27기 학생홍보대사 선발 안내</span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 1학기 HK 학습공동체 공모</span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026학년도 1학기 이뭣고-교학상장 공모 안내 </span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026학년도 1학기 교과구분 정정실시 안내</span>
+                    <span>2026.03.05</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="notice-section">
+        <div class="notice-section__box">
+            <div class="notice-section__box-top">
+                <div class="notice-section__title">
+                    <h1>학사안내</h1>
+                </div>
+                <div class="notice-section__plus">
+                    <span>더보기</span>
+                    <i class="fa-regular fa-square-plus"></i>
+                </div>
+            </div>
+            <ul class="notice-section__content">
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">운해장학재단 2026년 제 13기 운해장학생 선발 안내</span>
+                    <span>2025.12.02</span> 
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 대한민국산지직송 CI BI 디자인 공모전 안내</span>
+                    <span>2025.11.24</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2025년 미래성장 장학생 선발 안내</span>
+                    <span>2025.11.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 한국지도자육성장학재단 장학생 선발 안내</span> 
+                    <span>2025.10.20</span>
+                </li>
+            </ul>
+        </div>
+        <div class="notice-section__box">
+            <div class="notice-section__box-top">
+                <div class="notice-section__title">
+                    <h1>장학안내</h1>
+                </div>
+                <div class="notice-section__plus">
+                    <span>더보기</span>
+                    <i class="fa-regular fa-square-plus"></i>
+                </div>
+            </div>
+                
+            <ul class="notice-section__content">
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 27기 학생홍보대사 선발 안내</span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026년 1학기 HK 학습공동체 공모</span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026학년도 1학기 이뭣고-교학상장 공모 안내 </span>
+                    <span>2026.03.12</span>
+                </li>
+                <li class="notice-section__info">
+                    <span class="notice-section__info-text">2026학년도 1학기 교과구분 정정실시 안내</span>
+                    <span>2026.03.05</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+
+    <!-- 서비스 바로가기 섹션 -->
+    <div class="service-container" class="second_container">
+    <!-- 상단 탭 헤더 -->
+    <div class="service-tabs">
+        <button class="tab-btn active">서비스 바로가기</button>
+        <button class="tab-btn">학사일정</button>
+    </div>
+
+        <!-- 아이콘 그리드 영역 -->
+        <div class="service-grid">
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-print fa-lg"></i></div>
+            <span>증명발급</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-file-invoice-dollar fa-lg"></i></div>
+            <span>등록금고지서</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-envelope-open-text fa-lg"></i></div>
+            <span>학생메일</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-utensils fa-lg"></i></div>
+            <span>주간식단</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-robot fa-lg"></i></div>
+            <span>생성형AI(8종)</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-bowl-food fa-lg"></i></div>
+            <span>천원의 밥상<br>이천원 밥상</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-concierge-bell fa-lg"></i></div>
+            <span>점심 사전예약</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-wifi fa-lg"></i></div>
+            <span>와이파이사용</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-th-large fa-lg"></i></div>
+            <span>Google Workspace</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fab fa-microsoft fa-lg"></i></div>
+            <span>Microsoft 365</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-bus fa-lg"></i></div>
+            <span>셔틀버스예약</span>
+            </div>
+            <div class="service-item">
+            <div class="icon-box"><i class="fas fa-id-card fa-lg"></i></div>
+            <span>국제학생증</span>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<script src="https://kit.fontawesome.com/b5f2e36ca8.js" crossorigin="anonymous"></script>
+<!--<script src="../js/screen.js"></script> -->
+<script src="../js/banner.js"></script>
+<script src="../js/hot-news.js"></script>
+</body>
+</html>

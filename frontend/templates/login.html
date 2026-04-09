@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국대학교 - 통합 로그인</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/login.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <header class="header-logo">
+        <div class="header-content">
+            <div class="logo-wrapper">
+                <h1 class="school_name">한국대학교</h1>
+                <span class="school_name_eng">HANKUK NATIONAL UNIVERSITY</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="login-section">
+        <div class="login-wrapper">
+            <form id="loginForm" class="login-form">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2>로그인</h2>
+                        <p>학사정보시스템에 접속하세요</p>
+                    </div>
+
+                    <div class="login-input-group">
+                        <div class="input-wrapper">
+                            <label for="userId">아이디 (학번)</label>
+                            <div class="input-field">
+                                <i class="fas fa-user"></i>
+                                <input 
+                                    type="text" 
+                                    id="userId" 
+                                    name="userId"
+                                    class="login-input" 
+                                    placeholder="학번 또는 이메일"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="input-wrapper">
+                            <label for="userPassword">비밀번호</label>
+                            <div class="input-field">
+                                <i class="fas fa-lock"></i>
+                                <input 
+                                    type="password" 
+                                    id="userPassword"
+                                    name="userPassword"
+                                    class="login-input" 
+                                    placeholder="비밀번호"
+                                    required>
+                                <button type="button" class="toggle-password" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="login-check">
+                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                            <label for="rememberMe">로그인 정보 기억</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button">
+                        <span>로그인</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <div class="login-footer">
+                        <p class="error-message" id="errorMessage"></p>
+                        <p class="success-message" id="successMessage"></p>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-links">
+                <a href="#" class="link-item">
+                    <i class="fas fa-key"></i>
+                    <span>비밀번호 찾기</span>
+                </a>
+                <a href="#" class="link-item">
+                    <i class="fas fa-circle-question"></i>
+                    <span>도움말</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 한국대학교. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/login.js"></script>
+</body>
+</html>

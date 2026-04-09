@@ -1,0 +1,279 @@
+/* ==============================================================
+   1. 초기화 및 기본 설정 (Reset & Base)
+   ============================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #e5e5e5;          /* 페이지 전체 배경 */
+    overflow-x: hidden;
+    line-height: 1.4;
+}
+
+:root {
+    --brand-blue: #1B3B86;         /* 수안 블루 */
+    --brand-green: #377235;        /* 포인트 그린 */
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --border-light: #e0e0e0;
+    --container-width: 1200px;
+}
+
+/* 글로벌 유틸리티 컬러 강제 적용 */
+.date, .user-name, .more-btn, .text-logo {
+    color: var(--brand-blue) !important;
+}
+
+/* ==============================================================
+   2. 상단 유틸 바 (Util Bar - 로고/로그인 정보)
+   ============================================================== */
+.util-bar {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 0;
+}
+
+.util-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.text-logo {
+    font-weight: 900;
+    font-size: 22px;
+    margin: 0;
+}
+
+.portal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    border-left: 1px solid #ccc;
+    padding-left: 15px;
+}
+
+.top-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.top-links a, .user-info {
+    text-decoration: none;
+    color: var(--brand-blue);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-info strong {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+/* ==============================================================
+   3. 메인 내비게이션 (Sticky Nav & Mega Menu)
+   ============================================================== */
+.top-nav {
+    width: 100%;
+    background-color: var(--brand-blue);
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+
+.main-menu {
+    list-style: none;
+    display: flex;
+    width: 100%;
+    max-width: var(--container-width);
+}
+
+.menu-item {
+    flex: 1;
+    position: relative;
+    text-align: center;
+}
+
+.menu-item > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.menu-item:hover > a {
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 700;
+}
+
+/* 메가 서브메뉴 */
+.mega-menu {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    min-width: max-content;
+    background-color: #ffffff;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+    padding: 20px;
+    display: none;
+    text-align: left;
+    z-index: 10000;
+    gap: 30px;
+}
+
+.menu-item:hover .mega-menu {
+    display: flex;
+}
+
+.menu-column {
+    min-width: 140px;
+}
+
+.menu-column h4 {
+    font-size: 15px;
+    color: var(--brand-blue);
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--brand-blue);
+}
+
+.menu-column ul {
+    list-style: none;
+}
+
+.menu-column li {
+    font-size: 14px;
+    color: #555;
+    padding: 6px 0;
+}
+
+.menu-column ul li a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+}
+
+.menu-column ul li a:hover {
+    color: var(--brand-blue);
+    text-decoration: underline;
+}
+
+/* 메인 컨테이너 레이아웃 */
+.main-content {
+    padding: 40px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    padding-left: 5px;
+    border-left: 5px solid #1B3B86; /* 포인트 컬러 */
+}
+
+/* 카드 블록 */
+.info-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* 조금 더 은은한 그림자 */
+    padding: 15px 25px; /* 내부 여백 조정 */
+    border: 1px solid #e9ecef;
+}
+
+/* 표 기본 설정 */
+.grade-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 헤더와 셀을 동일한 정렬 조건으로 통일 */
+.grade-table th, 
+.grade-table td {
+    border: 1px solid #ddd;
+    padding: 12px 8px;   /* 위아래12px, 좌우8px 동일하게 */
+    text-align: center;  /* 헤더와 내용 모두 중앙 정렬해서 수직선 맞춤 */
+    vertical-align: middle;
+}
+
+/* 헤더 배경색 및 글자색 (기존 스타일 유지) */
+.grade-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 과목명은 왼쪽 정렬이 보기 좋습니다 (선택사항) */
+.text-left {
+    text-align: center;
+    padding-left: 20px !important;
+}
+
+/* 하단 합계 영역 */
+.total-label {
+    text-align: right;
+    padding: 15px 10px;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.total-value {
+    padding: 15px 10px;
+    font-weight: 800;
+    color: #1B3B86;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* 호버 효과 */
+.grade-table tbody tr:hover {
+    background-color: #f8faff;
+}
+
+/* 링크를 일반 텍스트처럼 보이게 함 */
+.plain-link {
+    text-decoration: none;   /* 밑줄 없앰 */
+    color: inherit;          /* 부모 색(보통 검정) 그대로 사용 */
+    cursor: default;         /* 화살표(기본 커서) – 클릭임을 힌트 안 줌 */
+}
+
+/* 혹시 브라우저가 :focus 스타일을 적용한다면 같이 없애 주세요 */
+.plain-link:focus,
+.plain-link:active,
+.plain-link:hover {
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+}

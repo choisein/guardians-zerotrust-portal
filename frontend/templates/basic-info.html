@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학적-기본정보변경</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/academy.css">
+</head>
+<body>
+    <header class="util-bar">
+        <div class="util-container">
+        <!-- 로고 영역 -->
+        <div class="logo-area">
+        <!-- 텍스트 로고 -->
+        <h1 class="text-logo"><a href="dashboard.html">보안대학교</a></h1>
+        <span class="portal-title">내 학사정보</span>
+        </div>
+        <!-- 서비스 링크 및 사용자 정보 -->
+        <div class="top-links">
+        <a href="#"><i class="fa-solid fa-map-location-dot"></i> 학사네비게이터</a>
+        <a href="#"><i class="fa-solid fa-laptop-code"></i> e클래스</a>
+        <a href="#"><i class="fa-solid fa-users-rectangle"></i> 취업포털</a>
+        <a href="#"><i class="fa-solid fa-file-invoice"></i> 증명</a>
+        <a href="#"><i class="fa-solid fa-house-chimney"></i> 생활관</a>
+        <a href="#"><i class="fa-solid fa-bell"></i> 통합알림</a>
+        <div class="lang-select">
+        <i class="fa-solid fa-globe"></i> LANGUAGE <i class="fa-solid fa-caret-down"></i>
+        </div>
+        <div class="user-info">
+        <strong id="header-user-info">정승현(213804)</strong>님 
+        <i class="fa-solid fa-circle-user"></i>
+        </div>
+        </div>
+        </div>
+    </header>
+        
+    <nav class="top-nav">
+            <ul class="main-menu">
+            <!-- ----- 학적 ----- -->
+            <li class="menu-item">
+            <a href="basic-info.html">학적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4><a class="nav-link" href="basic-info.html" id="basic-info">학적관리</a></h4>
+            <ul>
+            <li><a class="nav-link" href="basic-info.html" id="basic-info">기본정보변경</a></li>
+            <li><a class="nav-link" href="major.html" id="major">전공/교직</a></li>
+            </ul>
+            </div>
+            <div class="menu-column">
+                <h4><a class="nav-link" href="leave-apply.html" id="leave-apply">휴/복학</a></h4>
+                <ul>
+                <li><a class="nav-link" href="leave-apply.html" id="leave-apply">휴학신청</a></li>
+                <li><a class="nav-link" href="return-apply.html" id="return-apply">복학신청</a></li>
+                <li><a class="nav-link" href="change-major.html" id="change-major">전과신청</a></li>
+                <li><a class="nav-link" href="double-major.html" id="double-major">부/복수전공신청</a></li>
+                </ul>
+            </div>
+            </div>
+    
+            </li>
+            <!-- ----- 졸업 ----- -->
+            <li class="menu-item">
+            <a href="#">졸업</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>졸업자격확인</h4>
+            <ul>
+            <li>졸업소요학점</li>
+            <li>학부졸업자격확인</li>
+            <li>미리해본졸업사정</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 교육과정 ----- -->
+            <li class="menu-item">
+            <a href="#">교육과정</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>교육과정이수기준</h4>
+            <ul>
+            <li>교육과정이수기준</li>
+            <li>편입생이수기준</li>
+            <li>교육과정 적용 방법</li>
+            </ul>
+            </div>
+            <div class="menu-column">
+            <h4>교육과정조회</h4>
+            <ul>
+            <li>교양과목 조회</li>
+            <li>전공과목 조회</li>
+            <li>동일교과목 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+        <!-- ----- 수업 ----- -->
+            <li class="menu-item">
+            <a href="class-table.html">수업</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>수강신청</h4>
+            <ul>
+            <li><a href="class-table.html">수강시간표</a></li>
+            <li><a href="#">수강신청바로가기</a></li>
+            <li><a class="nav-link" href="course-registration.html">수강신청내역</a></li>
+            </ul>
+            </div>
+            <div class="menu-column">
+            <h4>기타수업</h4>
+            <ul>
+            <li><a href="#">교과목조회</a></li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 성적 ----- -->
+            <li class="menu-item">
+            <a href="#">성적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>성적조회</h4>
+            <ul>
+            <li><a class="nav-link" href="semester-grades.html">학기별 성적 조회</a></li>
+            <li>전체 성적 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 등록 ----- -->
+            <li class="menu-item">
+            <a href="#">등록</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>등록내역</h4>
+            <ul>
+            <li><a class="nav-link" href="tuition-history.html">등록내역 조회</a></li>
+            <li>등록금 영수증 출력</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 장학·복지 ----- -->
+            <li class="menu-item">
+            <a href="#">장학·복지</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>장학금</h4>
+            <ul>
+            <li>장학금 안내</li>
+            <li>장학금 신청</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            </ul>
+    </nav>
+    <!--좌측 사이드 바 영역-->
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-title">학적</div>
+
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    학적정보
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: block;">
+                    <li class="menu-item active">
+                        <i class="fas fa-check-circle"></i> <a href="basic-info.html">기본정보변경</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-graduation-cap"></i> <a href="major.html">전공/교직</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    휴/복학/전과신청
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: none;">
+                    <li class="menu-item">
+                        <i class="fas fa-pause-circle"></i> <a href="leave-apply.html">휴학신청</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-play-circle"></i> <a href="return-apply.html">복학신청</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-exchange-alt"></i> <a href="change-major.html">전과신청</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-plus-circle"></i> <a href="double-major.html">부/복수전공신청</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    
+        <!-- 우측 콘텐츠 영역 -->
+        <main class="main-content">
+            
+            <!-- 기본정보 탭 -->
+            <section id="basic-info" class="tab-content active">
+                <h1 class="page-title">기본정보</h1>
+                
+                <div class="profile-card">
+                    ![허정안](https://i.ibb.co/9q1QNnw/sample-profile.jpg)
+                    <div class="profile-info">
+                        <div class="profile-name">허정안 // HEO JEONGAN</div>
+                        <div class="profile-detail">한국대학교 농업생명과학대학 농업경제학과 | 4학년</div>
+                        <div class="profile-status">재학</div>
+                        <div class="profile-contact">
+                            휴대전화: 010-5132-3115 | 전화번호: 010-6707-9211
+                        </div>
+                        <div class="profile-email">hjasea292@naver.com</div>
+                    </div>
+                    <div class="watermark">한</div>
+                </div>
+
+                <form class="info-form">
+                    <div class="form-group">
+                        <label>영어성명</label>
+                        <div class="form-row">
+                            <input type="text" placeholder="성" value="HEO">
+                            <input type="text" placeholder="이름" value="JEONGAN">
+                            <input type="text" placeholder="한자성명">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>전자우편(E-mail)</label>
+                        <input type="email" value="hjasea292@naver.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>휴대전화 / 전화번호</label>
+                        <div class="form-row">
+                            <input type="tel" value="01051323115" placeholder="휴대전화">
+                            <input type="tel" value="010-6707-9211" placeholder="전화번호">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>우편번호 / 주소</label>
+                        <div class="form-row-special">
+                            <input type="text" value="57925" style="max-width: 100px;" placeholder="우편번호">
+                            <button type="button" class="btn-search" onclick="alert('우편번호 검색 기능은 준비 중입니다.')">우편번호</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" value="전남 순천시 서면 선평윗길 23 (선평리, 모아엘가 리버파크)" placeholder="주소">
+                        <input type="text" value="105동 804호" placeholder="상세주소">
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="alert('정보수정 기능은 준비 중입니다.')">정보수정</button>
+                </form>
+
+                <div class="notice-box">
+                    <strong>⚠️ 유의사항 안내</strong>
+                    <ul>
+                        <li>학생기본정보를 확인하여 주시기 바라며, 필수항목들은 반드시 입력해 주시기 바랍니다.</li>
+                        <li>사진이 잘못되어 있거나, 오래된 사진을 바꾸고자 하신 경우는 OS센터로 사진을 지참하고 방문하시기 바랍니다.</li>
+                        <li>수강신청 기간에는 사진을 제공하지 않습니다. 양해 바랍니다.</li>
+                        <br>
+                        <li><strong>[업무담당자 전화번호 안내]</strong></li>
+                        <li>학부졸업(학사과): 530-1057 &nbsp;&nbsp;&nbsp;&nbsp; 대학원졸업(학사과): 530-1052</li>
+                        <li>일반교직(학사과): 530-1052 &nbsp;&nbsp;&nbsp;&nbsp; 수강신청(학사과): 530-1063</li>
+                        <li>성적(학사과): 530-1056 &nbsp;&nbsp;&nbsp;&nbsp; 휴복학(학사과): 530-1050</li>
+                        <li>부·복수전공(학사과): 530-1053 &nbsp;&nbsp;&nbsp;&nbsp; 등록금(재무과): 530-1201</li>
+                        <li>장학금(학생과): 교내장학 530-1103, 교외장학 530-1073</li>
+                        <li>학생스마트카드 및 사진변경(OS센터): 530-0952</li>
+                        <li>취업을 희망하는 학생은 취업·진로에 로그인하여 구직등록을 하시기 바랍니다.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+<script src="../js/academy.js"></script>
+<script src="../js/sidebar.js"></script>
+</html>

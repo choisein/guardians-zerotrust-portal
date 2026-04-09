@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>전남대 학사 포털 클론</title>
+    <!-- 구글 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap"
+          rel="stylesheet">
+    <!-- Font Awesome 아이콘 -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-... (생략) ..." crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="../css/tuition-history.css">
+</head>
+<body>
+<!-- ==================== 최상단 유틸리티 바 (로고 & 서비스 바로가기) ==================== -->
+<header class="util-bar">
+    <div class="util-container">
+        <!-- 로고 영역 -->
+        <div class="logo-area">
+            <!-- 텍스트 로고 -->
+            <h1 class="text-logo">
+                <a href="dashboard.html" id="univLink" class="plain-link">보안대학교</a>
+            </h1>
+            <span class="portal-title">내 학사정보</span>
+        </div>
+
+        <!-- 서비스 링크 및 사용자 정보 -->
+        <div class="top-links">
+            <a href="#"><i class="fa-solid fa-map-location-dot"></i> 학사네비게이터</a>
+            <a href="#"><i class="fa-solid fa-laptop-code"></i> e클래스</a>
+            <a href="#"><i class="fa-solid fa-users-rectangle"></i> 취업포털</a>
+            <a href="#"><i class="fa-solid fa-file-invoice"></i> 증명</a>
+            <a href="#"><i class="fa-solid fa-house-chimney"></i> 생활관</a>
+            <a href="#"><i class="fa-solid fa-bell"></i> 통합알림</a>
+            
+            <div class="lang-select">
+                <i class="fa-solid fa-globe"></i> LANGUAGE <i class="fa-solid fa-caret-down"></i>
+            </div>
+
+            <div class="user-info">
+                <!-- 이름 -->
+                <strong id="name">데이터 로딩 중…</strong>
+                <!-- 학번 -->
+                <span id="student_id" class="ml-2">(학번: --)</span>
+                <i class="fa-solid fa-circle-user ml-2"></i>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <!-- ==================== Header (Mega Menu) ==================== -->
+    <nav class="top-nav">
+        <ul class="main-menu">
+
+            <!-- ----- 학적 ----- -->
+            <li class="menu-item">
+                <a href="#">학적</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>학적관리</h4>
+                        <ul>
+                            <li><a href="basic-info.html" class="nav-link">학적기본사항조회</a></li>
+                            <li>학적변동현황조회</li>
+                            <li>전공신청</li>
+                        </ul>
+                    </div>
+                    <div class="menu-column">
+                        <h4>휴/복학</h4>
+                        <ul>
+                            <li>휴학신청</li>
+                            <li>복학과정안내</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 졸업 ----- -->
+            <li class="menu-item">
+                <a href="#">졸업</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>졸업자격확인</h4>
+                        <ul>
+                            <li>졸업소요학점</li>
+                            <li>학부졸업자격확인</li>
+                            <li>미리해본졸업사정</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 교육과정 ----- -->
+            <li class="menu-item">
+                <a href="#">교육과정</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>교육과정이수기준</h4>
+                        <ul>
+                            <li>교육과정이수기준</li>
+                            <li>편입생이수기준</li>
+                            <li>교육과정 적용 방법</li>
+                        </ul>
+                    </div>
+                    <div class="menu-column">
+                        <h4>교육과정조회</h4>
+                        <ul>
+                            <li>교양과목 조회</li>
+                            <li>전공과목 조회</li>
+                            <li>동일교과목 조회</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 수업 ----- -->
+            <li class="menu-item">
+                <a href="#">수업</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>수강신청</h4>
+                        <ul>
+                            <li>강의시간표조회</li>
+                            <li><a href="course-registration.html" class="nav-link">수강신청내역</a></li>
+                        </ul>
+                    </div>
+                    <div class="menu-column">
+                        <h4>기타수업</h4>
+                        <ul>
+                            <li>교과목조회</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 성적 ----- -->
+            <li class="menu-item">
+                <a href="#">성적</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>성적조회</h4>
+                        <ul>
+                            <li><a href="semester-grades.html" class="nav-link">학기별 성적 조회</a></li>
+                            <li>전체 성적 조회</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 등록 ----- -->
+            <li class="menu-item">
+                <a href="#">등록</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>등록내역</h4>
+                        <ul>
+                            <li><a href="tuition-history.html" class="nav-link">등록내역 조회</a></li>
+                            <li>등록금 영수증 출력</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <!-- ----- 기타 (예시) ----- -->
+            <li class="menu-item">
+                <a href="#">장학·복지</a>
+                <div class="mega-menu">
+                    <div class="menu-column">
+                        <h4>장학금</h4>
+                        <ul>
+                            <li>장학금 안내</li>
+                            <li>장학금 신청</li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+    </nav>
+    <main class="container">
+        <header class="content-header">
+            <h2 class="section-title">가납부/수납내역 조회</h2>
+            <p class="section-desc">학생 본인의 학기별 등록금 납부 및 환불 내역을 확인하실 수 있습니다.</p>
+        </header>
+
+        <section class="tuition-section">
+            <table class="tuition-table" id="tuitionTable">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 15%;">
+                    <col style="width: 25%;">
+                    <col style="width: 25%;">
+                    <col style="width: 20%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>학년도/학기</th>
+                        <th>등록구분</th>
+                        <th>납부대상금액</th>
+                        <th>실납부금액</th>
+                        <th>납부일자</th>
+                    </tr>
+                </thead>
+                <tbody id="tuitionBody">
+                    <!-- JS에서 데이터가 동적으로 삽입됩니다 -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- 스크립트 연결 -->
+    <script src="../js/navigation.js"></script> <!-- 학번 유지 및 링크 처리 -->
+    <script src="../js/tuition-history.js"></script>
+</body>
+</html>

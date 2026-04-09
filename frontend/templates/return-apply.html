@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학적 - 복학신청</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/academy.css">
+</head>
+<body>
+    <header class="util-bar">
+        <div class="util-container">
+        <!-- 로고 영역 -->
+        <div class="logo-area">
+        <!-- 텍스트 로고 -->
+        <h1 class="text-logo"><a href="dashboard.html">보안대학교</a></h1>
+        <span class="portal-title">내 학사정보</span>
+        </div>
+        <!-- 서비스 링크 및 사용자 정보 -->
+        <div class="top-links">
+        <a href="#"><i class="fa-solid fa-map-location-dot"></i> 학사네비게이터</a>
+        <a href="#"><i class="fa-solid fa-laptop-code"></i> e클래스</a>
+        <a href="#"><i class="fa-solid fa-users-rectangle"></i> 취업포털</a>
+        <a href="#"><i class="fa-solid fa-file-invoice"></i> 증명</a>
+        <a href="#"><i class="fa-solid fa-house-chimney"></i> 생활관</a>
+        <a href="#"><i class="fa-solid fa-bell"></i> 통합알림</a>
+        <div class="lang-select">
+        <i class="fa-solid fa-globe"></i> LANGUAGE <i class="fa-solid fa-caret-down"></i>
+        </div>
+        <div class="user-info">
+        <strong id="header-user-info">정승현(213804)</strong>님 
+        <i class="fa-solid fa-circle-user"></i>
+        </div>
+        </div>
+        </div>
+    </header>
+        
+    <nav class="top-nav">
+            <ul class="main-menu">
+            <!-- ----- 학적 ----- -->
+            <li class="menu-item">
+            <a href="basic-info.html">학적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4><a class="nav-link" href="basic-info.html">학적관리</a></h4>
+            <ul>
+            <li><a class="nav-link" href="basic-info.html">기본정보변경</a></li>
+            <li><a class="nav-link" href="major.html">전공/교직</a></li>
+            </ul>
+            </div>
+            <div class="menu-column">
+                <h4><a class="nav-link" href="leave-apply.html">휴/복학</a></h4>
+                <ul>
+                <li><a class="nav-link" href="leave-apply.html">휴학신청</a></li>
+                <li><a class="nav-link" href="return-apply.html">복학신청</a></li>
+                <li><a class="nav-link" href="change-major.html">전과신청</a></li>
+                <li><a class="nav-link" href="double-major.html">부/복수전공신청</a></li>
+                </ul>
+            </div>
+            </div>
+    
+            </li>
+            <!-- ----- 졸업 ----- -->
+            <li class="menu-item">
+            <a href="#">졸업</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>졸업자격확인</h4>
+            <ul>
+            <li>졸업소요학점</li>
+            <li>학부졸업자격확인</li>
+            <li>미리해본졸업사정</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 교육과정 ----- -->
+            <li class="menu-item">
+            <a href="#">교육과정</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>교육과정이수기준</h4>
+            <ul>
+            <li>교육과정이수기준</li>
+            <li>편입생이수기준</li>
+            <li>교육과정 적용 방법</li>
+            </ul>
+            </div>
+            <div class="menu-column">
+            <h4>교육과정조회</h4>
+            <ul>
+            <li>교양과목 조회</li>
+            <li>전공과목 조회</li>
+            <li>동일교과목 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 수업 ----- -->
+            <li class="menu-item">
+                <a href="class-table.html">수업</a>
+                <div class="mega-menu">
+                <div class="menu-column">
+                <h4>수강신청</h4>
+                <ul>
+                <li><a href="class-table.html">수강시간표</a></li>
+                <li><a href="#">수강신청바로가기</a></li>
+                <li><a class="nav-link" href="course-registration.html">수강신청내역</a></li>
+                </ul>
+                </div>
+                <div class="menu-column">
+                <h4>기타수업</h4>
+                <ul>
+                <li><a href="#">교과목조회</a></li>
+                </ul>
+                </div>
+                </div>
+                </li>
+            <!-- ----- 성적 ----- -->
+            <li class="menu-item">
+            <a href="#">성적</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>성적조회</h4>
+            <ul>
+            <li><a class="nav-link" href="semester-grades.html">학기별 성적 조회</a></li>
+            <li>전체 성적 조회</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 등록 ----- -->
+            <li class="menu-item">
+            <a href="#">등록</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>등록내역</h4>
+            <ul>
+            <li><a class="nav-link" href="tuition-history.html">등록내역 조회</a></li>
+            <li>등록금 영수증 출력</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            <!-- ----- 장학·복지 ----- -->
+            <li class="menu-item">
+            <a href="#">장학·복지</a>
+            <div class="mega-menu">
+            <div class="menu-column">
+            <h4>장학금</h4>
+            <ul>
+            <li>장학금 안내</li>
+            <li>장학금 신청</li>
+            </ul>
+            </div>
+            </div>
+            </li>
+            </ul>
+    </nav>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-title">학적</div>
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    학적정보
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: none;">
+                    <li class="menu-item">
+                        <i class="fas fa-check-circle"></i> <a href="basic-info.html">기본정보변경</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-graduation-cap"></i> <a href="major.html">전공/교직</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="section-title collapsible" onclick="toggleSection(this)">
+                    휴/복학/전과신청
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <ul class="menu-list" style="display: block;">
+                    <li class="menu-item">
+                        <i class="fas fa-pause-circle"></i> <a href="leave-apply.html">휴학신청</a>
+                    </li>
+                    <li class="menu-item active">
+                        <i class="fas fa-play-circle"></i> <a href="return-apply.html">복학신청</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-exchange-alt"></i> <a href="change-major.html">전과신청</a>
+                    </li>
+                    <li class="menu-item">
+                        <i class="fas fa-plus-circle"></i> <a href="double-major.html">부/복수전공신청</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <section class="tab-content active">
+                <h1 class="page-title">복학신청</h1>
+
+                <form class="apply-form" id="return-form">
+                    <div class="form-group">
+                        <label>복학예정학기 *</label>
+                        <select required>
+                            <option value="">선택하세요</option>
+                            <option value="2026-1">2026학년도 1학기</option>
+                            <option value="2026-2">2026학년도 2학기</option>
+                            <option value="2027-1">2027학년도 1학기</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="alert('복학신청이 접수되었습니다.')">복학신청</button>
+                </form>
+
+                <div class="notice-box">
+                    <strong>📌 복학 안내</strong>
+                    <ul>
+                        <li>복학신청 후 학사과 승인이 필요합니다.</li>
+                        <li>복학학기 등록금 납부 기간을 확인하세요.</li>
+                        <li>복학 후 수강신청 일정을 사전에 확인하시기 바랍니다.</li>
+                        <li>복학 시 재정 상태를 먼저 확인하시기 바랍니다.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+<script src="../js/academy.js"></script>
+<script src="../js/sidebar.js"></script>
+</html>
