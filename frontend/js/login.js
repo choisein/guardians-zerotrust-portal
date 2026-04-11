@@ -73,9 +73,9 @@ async function handleLogin(userId, userPassword, rememberMe) {
                 localStorage.removeItem('rememberMe');
             }
             
-            // 2초 후 screen.html로 이동
+            // 2초 후 dashboard.html로 이동
             setTimeout(() => {
-                window.location.href = 'screen.html';
+                window.location.href = 'dashboard.html';
             }, 2000);
         } else {
             showError('아이디 또는 비밀번호가 일치하지 않습니다.');
