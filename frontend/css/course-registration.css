@@ -1,0 +1,203 @@
+/* ==============================================================
+   enrollment.css
+   ──────────────────────────────────────────────────────────────
+   수강내역조회 페이지 전용 스타일
+   대상 HTML: content-header, content-body, info-card,
+              card-header, card-content, lecture-table
+   ============================================================== */
+
+:root {
+    --brand-blue: #1B3B86;
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --border-light: #e0e0e0;
+}
+
+
+/* ─────────────────────────────────────────────
+   1. 페이지 타이틀
+   ───────────────────────────────────────────── */
+.content-header {
+    margin-bottom: 28px;
+}
+
+.content-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    padding-left: 14px;
+    border-left: 5px solid var(--brand-blue);
+    line-height: 1.3;
+}
+
+
+/* ─────────────────────────────────────────────
+   2. 메인 콘텐츠 영역
+   ───────────────────────────────────────────── */
+.content-body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+
+/* ─────────────────────────────────────────────
+   3. 카드 블록
+   ───────────────────────────────────────────── */
+.info-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    overflow: hidden;           /* 테이블 모서리 잘림 방지 */
+}
+
+.card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.card-content {
+    padding: 0;                 /* 테이블이 카드 가장자리까지 채움 */
+}
+
+
+/* ─────────────────────────────────────────────
+   4. 수강내역 테이블
+   ───────────────────────────────────────────── */
+.lecture-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.lecture-table th,
+.lecture-table td {
+    padding: 13px 16px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+/* 헤더 */
+.lecture-table thead th {
+    background-color: #f5f7fa;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-dark);
+    border-bottom: 2px solid var(--border-light);
+    white-space: nowrap;
+}
+
+/* 본문 행 */
+.lecture-table tbody td {
+    color: var(--text-dark);
+    font-weight: 400;
+}
+
+/* 과목명 왼쪽 정렬 */
+.lecture-table th:first-child,
+.lecture-table td:first-child {
+    text-align: left;
+    padding-left: 24px;
+    font-weight: 500;
+}
+
+/* 마지막 행 border 제거 */
+.lecture-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 호버 효과 */
+.lecture-table tbody tr:hover {
+    background-color: #f8faff;
+    transition: background-color 0.15s ease;
+}
+
+/* 짝수 행 줄무늬 (선택사항 - 가독성 향상) */
+.lecture-table tbody tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+.lecture-table tbody tr:nth-child(even):hover {
+    background-color: #f8faff;
+}
+
+/* 성적 컬럼 강조 */
+.lecture-table td:last-child {
+    font-weight: 700;
+    color: var(--brand-blue);
+}
+
+
+/* ─────────────────────────────────────────────
+   5. 빈 상태 (데이터 없을 때)
+   ───────────────────────────────────────────── */
+.lecture-table tbody tr.empty-row td {
+    padding: 48px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: none;
+}
+
+/* 에러 상태 */
+.lecture-table tbody tr.error-row td {
+    padding: 32px 20px;
+    text-align: center;
+    color: #c62828;
+    font-weight: 500;
+    border-bottom: none;
+}
+
+
+/* ─────────────────────────────────────────────
+   6. 반응형
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    .content-header h1 {
+        font-size: 19px;
+    }
+
+    .card-header {
+        padding: 14px 18px;
+    }
+
+    .card-header h2 {
+        font-size: 15px;
+    }
+
+    .lecture-table th,
+    .lecture-table td {
+        padding: 11px 10px;
+        font-size: 13px;
+    }
+
+    .lecture-table th:first-child,
+    .lecture-table td:first-child {
+        padding-left: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .content-header h1 {
+        font-size: 17px;
+        padding-left: 10px;
+    }
+
+    .lecture-table th,
+    .lecture-table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+}

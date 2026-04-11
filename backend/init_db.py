@@ -136,7 +136,7 @@ def init():
 
         # 테스트 계정 비밀번호 설정 (test1234)
         test_pw = hashlib.sha256("test1234".encode()).hexdigest()
-        for uid in ["user_202300001", "admin_001"]:
+        for uid in ["user_202300001", "user_201800002", "user_201800003", "user_202300004", "admin_001"]:
             u = User.query.get(uid)
             if u:
                 u.password = test_pw

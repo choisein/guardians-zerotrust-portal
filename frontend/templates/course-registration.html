@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../static/css/academy.css">
     <link rel="stylesheet" href="../static/css/course-registration.css">
+    <link rel="stylesheet" href="/css/course-registration.css">
+
 </head>
 <body>
     <header class="util-bar">
@@ -218,71 +220,20 @@
                     <div class="info-card">
                         <div class="card-header">
                             <h2>2026학년도 1학기 수강과목</h2>
-                            <span class="semester-badge">진행중</span>
                         </div>
                         <div class="card-content">
                             <table class="lecture-table">
                                 <thead>
                                     <tr>
-                                        <th>교과목번호</th>
                                         <th>과목명</th>
-                                        <th>학점</th>
-                                        <th>이수구분</th>
                                         <th>교수명</th>
-                                        <th>강의시간</th>
+                                        <th>성적</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>AGR3042</td>
-                                        <td>농업경제학특론</td>
-                                        <td>3</td>
-                                        <td><span class="badge-major">전공</span></td>
-                                        <td>김철수 교수</td>
-                                        <td>월, 수 10:00~11:30</td>
-                                    </tr>
-                                    <tr>
-                                        <td>AGR3051</td>
-                                        <td>국제농업통상</td>
-                                        <td>3</td>
-                                        <td><span class="badge-major">전공</span></td>
-                                        <td>박영희 교수</td>
-                                        <td>화, 목 14:00~15:30</td>
-                                    </tr>
-                                    <tr>
-                                        <td>AGR3067</td>
-                                        <td>농업정책론</td>
-                                        <td>3</td>
-                                        <td><span class="badge-major">전공</span></td>
-                                        <td>이준호 교수</td>
-                                        <td>월, 수 13:00~14:30</td>
-                                    </tr>
-                                    <tr>
-                                        <td>AGR2087</td>
-                                        <td>농업금융론</td>
-                                        <td>3</td>
-                                        <td><span class="badge-elective">교필</span></td>
-                                        <td>정명순 교수</td>
-                                        <td>수, 금 11:00~12:30</td>
-                                    </tr>
+                                <tbody id ="course-list-body">
+
                                 </tbody>
                             </table>
-            
-                            <!-- 학기 요약 -->
-                            <div class="semester-summary">
-                                <div class="summary-item">
-                                    <span class="summary-label">신청학점</span>
-                                    <span class="summary-value">12</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">전공학점</span>
-                                    <span class="summary-value">9</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">선택학점</span>
-                                    <span class="summary-value">3</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
             
@@ -293,4 +244,5 @@
     </div>
 </body>
 <script src="../static/js/academy.js"></script>
+<script src="/js/course-registration.js"></script>
 </html>
