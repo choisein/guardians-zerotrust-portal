@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .                        # 루트를 기준으로 빌드 (frontend, backend 둘 다 접근 가능)
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/portal.db:/app/backend/portal.db  # DB 데이터 유지
+    restart: unless-stopped
