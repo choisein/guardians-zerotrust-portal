@@ -40,9 +40,9 @@
 
             <div class="user-info">
                 <!-- 이름 -->
-                <strong id="name">데이터 로딩 중…</strong>
+                <strong id="name">관리자</strong>
                 <!-- 학번 -->
-                <span id="student_id" class="ml-2">(학번: --)</span>
+                <span id="student_id" class="ml-2"> </span>
                 <i class="fa-solid fa-circle-user ml-2"></i>
             </div>
         </div>
@@ -216,26 +216,24 @@
             <div class="profile-info-text">
 
                 <!-- 이름 (가장 크게) - 변수명: name -->
-                <div class="user-name" id="name">홍길동</div>
+                <div class="user-name" id="name">관리자</div>
 
                 <!-- 학번 (이름 바로 아래, 작게) - 변수명: student_id -->
-                <div class="user-id" id="student_id">123456</div>
+                <div class="user-id" id="student_id"></div>
 
                 <!-- 학점/학기 정보 | 재학 | [성별] -->
                 <div class="user-sub-info">
                     <!-- ERD의 current_semester(1~8)를 가져와서 JS로 "n학년" 변환 권장 -->
-                    <span id="current_semester">4학년</span> 
+                    <span id="current_semester"></span> 
                     <span class="divider">|</span>
                     <!-- 변수명: status (재학/휴학 등) -->
-                    <span id="status">재학</span>
+                    <span id="status"></span>
                     <span class="divider">|</span>
-                    <!-- 성별은 ERD에 없으므로 일단 유지 (추후 필요시 추가) -->
-                    <span>[<span id="gender">여</span>]</span>
                 </div>
 
                 <!-- 전공 (가장 아래) - 변수명: major -->
                 <div class="user-major">
-                    전공 : <span id="major">소프트웨어공학과</span>
+                     <span id="major">보안대학교 포털 관리자</span>
                 </div>
             </div>
         </div>
@@ -373,5 +371,6 @@
     </div>
 </div>    
     <script src="/js/navigation.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

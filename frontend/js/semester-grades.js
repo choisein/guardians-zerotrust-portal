@@ -1,71 +1,108 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. 학번 가져오기 (URL 파라미터 혹은 기본값)
-    const urlParams = new URLSearchParams(window.location.search);
-    // URL -> localStorage -> 기본값 순서로 학번을 찾습니다.
-    const studentId = urlParams.get('studentId') || localStorage.getItem('studentId') || '213804';
+// semester-grades.js - 학기별 성적 API 연동
 
-    // 만약 URL로 들어왔다면 나중을 위해 localStorage에 업데이트해줍니다.
-    if (urlParams.get('studentId')) {
-        localStorage.setItem('studentId', studentId);
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadGrades();
+});
+
+async function loadGrades() {
+    try {
+        const profileRes = await fetch('/api/student/profile', {
+            credentials: 'include',
+        });
+
+        if (profileRes.status === 401) {
+            window.location.href = '/';
+            return;
+        }
+
+        if (profileRes.ok) {
+            const profile = await profileRes.json();
+            const nameEl = document.getElementById('name');
+            const studentIdEl = document.getElementById('student_id');
+            if (nameEl) nameEl.textContent = profile.name;
+            if (studentIdEl) studentIdEl.textContent = `(학번: ${profile.student_id})`;
+        }
+
+        const gradesRes = await fetch('/api/student/grades', {
+            credentials: 'include',
+        });
+
+        if (!gradesRes.ok) {
+            showError('성적 데이터를 불러오지 못했습니다.');
+            return;
+        }
+
+        const data = await gradesRes.json();
+        renderGrades(data);
+
+    } catch (error) {
+        console.error('성적 로딩 오류:', error);
+        showError('서버 연결에 실패했습니다.');
+    }
+}
+
+function renderGrades(data) {
+    const tbody = document.getElementById('grade-list');
+    const avgGradeEl = document.getElementById('avg_grade');
+
+    if (!tbody) return;
+
+    const semesters = data.semesters || {};
+    const semesterKeys = Object.keys(semesters).sort((a, b) => Number(a) - Number(b));
+
+    if (semesterKeys.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">성적 데이터가 없습니다.</td></tr>';
+        return;
     }
 
-    // 2. 화면 요소 잡기
-    const gradeListContainer = document.getElementById('grade-list');
-    const avgGradeElement = document.getElementById('avg_grade');
+    let html = '';
 
-    // 3. 임시 데이터 (실제 DB 연결 전까지 보여줄 데이터)
-    const mockGrades = [
-        { semester: "2024-1", course_name: "네트워크 보안", course_grade: "A+", semester_grade: "4.5" },
-        { semester: "2024-1", course_name: "운영체제론", course_grade: "A0", semester_grade: "4.0" },
-        { semester: "2024-1", course_name: "알고리즘 분석", course_grade: "B+", semester_grade: "3.5" },
-        { semester: "2024-1", course_name: "데이터베이스 응용", course_grade: "A+", semester_grade: "4.5" }
-    ];
+    semesterKeys.forEach(sem => {
+        const semData = semesters[sem];
+        const courses = semData.courses || [];
+        const semGrade = semData.semester_grade ? Number(semData.semester_grade).toFixed(2) : '-';
 
-    // [중요] 실제 데이터 렌더링 함수
-    function renderGrades(data) {
-        if (!gradeListContainer) return;
+        // 학기 헤더 행 ✅ colspan="2"
+        html += `
+            <tr style="background:#f0f4ff;">
+                <td colspan="2" style="font-weight:bold; padding-left:12px;">
+                    ${sem}학기
+                </td>
+            </tr>
+        `;
 
-        let htmlContent = '';
-        let totalSum = 0;
-
-        data.forEach(item => {
-            htmlContent += `
+        // 과목별 행 ✅ td 2개만 (과목명 + 평점)
+        courses.forEach(course => {
+            const grade = course.course_grade !== null ? Number(course.course_grade).toFixed(1) : '-';
+            html += `
                 <tr>
-                    <td>${item.semester}</td>
-                    <td style="text-align: left; padding-left: 20px;">${item.course_name}</td>
-                    <td>${item.course_grade}</td>
-                    <td style="font-weight:bold;">${item.semester_grade}</td>
+                    <td style="text-align:left; padding-left:20px;">${course.course_name}</td>
+                    <td>${grade}</td>
                 </tr>
             `;
-            totalSum += parseFloat(item.semester_grade);
         });
 
-        gradeListContainer.innerHTML = htmlContent;
-        
-        // 평균 계산 후 출력
-        const average = (totalSum / data.length).toFixed(2);
-        avgGradeElement.innerText = average;
+        // 학기 평균 행 ✅ td 2개만
+        html += `
+            <tr style="background:#fafafa; border-top: 1px solid #ddd;">
+                <td style="text-align:right; padding-right:20px; color:#555; font-size:0.9em;">
+                    ${sem}학기 평균 평점
+                </td>
+                <td style="font-weight:bold; color:#2563eb;">${semGrade}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+
+    if (avgGradeEl) {
+        avgGradeEl.textContent = data.avg_grade ? Number(data.avg_grade).toFixed(2) : '-';
     }
+}
 
-    /* 
-       4. 데이터 연동 로직
-       지금은 DB가 없으므로 바로 renderGrades(mockGrades)를 실행합니다.
-       나중에 DB가 생기면 아래 주석 처리된 fetch 부분을 사용하세요.
-    */
-
-    // --- 실제 DB 연결 시 사용할 코드 (주석 해제 후 사용) ---
-    /*
-    fetch(`https://api.university.com/grades?studentId=${studentId}`)
-        .then(res => res.json())
-        .then(realData => {
-            renderGrades(realData);
-        })
-        .catch(err => {
-            console.error("데이터 로드 실패, 목데이터를 표시합니다.");
-            renderGrades(mockGrades); 
-        });
-    */
-
-    // 
-    renderGrades(mockGrades);
-});
+function showError(msg) {
+    const tbody = document.getElementById('grade-list');
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:red;">${msg}</td></tr>`;
+    }
+}

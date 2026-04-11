@@ -3,10 +3,13 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .                        # 루트를 기준으로 빌드 (frontend, backend 둘 다 접근 가능)
+      context: .
       dockerfile: backend/Dockerfile
     ports:
       - "5000:5000"
     volumes:
-      - ./backend/portal.db:/app/backend/portal.db  # DB 데이터 유지
+      - ./backend:/app/backend      # 백엔드 소스 전체 마운트
+      - ./frontend:/app/frontend    # 프론트엔드 소스 전체 마운트
+    environment:
+      - FLASK_DEBUG=1               # 자동 재시작
     restart: unless-stopped
