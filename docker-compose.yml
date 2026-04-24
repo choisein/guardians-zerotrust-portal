@@ -1,15 +1,264 @@
-version: '3.8'
+#
+# docker-compose.yml - Guardians Zero-Trust Portal
+# ─────────────────────────────────────────────────
+# 구성:
+#   - spire-server : SPIRE Server (SVID 발급)
+#   - spire-agent  : SPIRE Agent (Workload API 제공)
+#   - opa          : Open Policy Agent (인가 결정)
+#   - gateway      : API Gateway (SPIFFE ID: .../service/gateway)
+#   - auth-service : 로그인 (.../service/auth)
+#   - profile-service : 학적조회 (.../service/profile)
+#   - grades-service  : 성적조회 (.../service/grades)
+#   - enrollments-service : 수강내역조회 (.../service/enrollments)
+#   - registrations-service : 등록금납부조회 (.../service/registrations)
+#
+# 실행 순서:
+#   1) docker compose up -d spire-server
+#   2) docker compose exec spire-server sh /spire/scripts/bootstrap-agent.sh
+#   3) docker compose up -d spire-agent
+#   4) docker compose exec spire-server sh /spire/scripts/register-workloads.sh
+#   5) docker compose up -d
+#
 
 services:
-  backend:
+  # ─────────────────────────────────────────
+  # SPIRE Server
+  # ─────────────────────────────────────────
+  spire-server:
+    image: ghcr.io/spiffe/spire-server:1.9.0
+    container_name: spire-server
+    hostname: spire-server
+    command: ["-config", "/run/spire/server/config/server.conf"]
+    volumes:
+      - ./spire/server/server.conf:/run/spire/server/config/server.conf:ro
+      - ./spire/scripts:/spire/scripts:ro
+      - spire-server-data:/run/spire/server/data
+    ports:
+      - "8081:8081"
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # SPIRE Agent (각 서비스에 Workload API 제공)
+  # ─────────────────────────────────────────
+  spire-agent:
+    image: ghcr.io/spiffe/spire-agent:1.9.0
+    container_name: spire-agent
+    hostname: spire-agent
+    depends_on:
+      - spire-server
+    # SPIRE 이미지는 distroless. ENTRYPOINT/CMD 합성 이슈를 피하기 위해
+    # entrypoint 로 전체 명령을 명시합니다.
+    # JOIN_TOKEN 은 프로젝트 루트 .env 에서 자동 주입.
+    entrypoint:
+      - "/opt/spire/bin/spire-agent"
+      - "run"
+      - "-config"
+      - "/run/spire/agent/config/agent.conf"
+      - "-joinToken"
+      - "${JOIN_TOKEN:-MISSING}"
+    volumes:
+      - ./spire/agent/agent.conf:/run/spire/agent/config/agent.conf:ro
+      - spire-agent-data:/run/spire/agent/data
+      - spire-agent-socket:/run/spire/agent/public
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # OPA (Open Policy Agent)
+  # ─────────────────────────────────────────
+  opa:
+    image: openpolicyagent/opa:0.66.0
+    container_name: opa
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "--log-level=info"
+      - "/policies"
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./opa/policies:/policies:ro
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # API Gateway (SPIFFE: .../service/gateway)
+  # ─────────────────────────────────────────
+  gateway:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: gateway/Dockerfile
+    container_name: gateway
+    labels:
+      com.guardians.service: "gateway"
+    environment:
+      SERVICE_NAME: "gateway"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/gateway"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      AUTH_URL: "http://auth-service:5001"
+      PROFILE_URL: "http://profile-service:5002"
+      GRADES_URL: "http://grades-service:5003"
+      ENROLLMENTS_URL: "http://enrollments-service:5004"
+      REGISTRATIONS_URL: "http://registrations-service:5005"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
     ports:
       - "5000:5000"
-    volumes:
-      - ./backend:/app/backend      # 백엔드 소스 전체 마운트
-      - ./frontend:/app/frontend    # 프론트엔드 소스 전체 마운트
-    environment:
-      - FLASK_DEBUG=1               # 자동 재시작
+    depends_on:
+      - spire-agent
+      - opa
+      - auth-service
+      - profile-service
+      - grades-service
+      - enrollments-service
+      - registrations-service
+    networks:
+      - zerotrust-net
     restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # auth-service (로그인)
+  # ─────────────────────────────────────────
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: auth-service
+    labels:
+      com.guardians.service: "auth"
+    environment:
+      SERVICE_NAME: "auth"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/auth"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # profile-service (학적조회)
+  # ─────────────────────────────────────────
+  profile-service:
+    build:
+      context: .
+      dockerfile: services/profile-service/Dockerfile
+    container_name: profile-service
+    labels:
+      com.guardians.service: "profile"
+    environment:
+      SERVICE_NAME: "profile"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/profile"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # grades-service (성적조회)
+  # ─────────────────────────────────────────
+  grades-service:
+    build:
+      context: .
+      dockerfile: services/grades-service/Dockerfile
+    container_name: grades-service
+    labels:
+      com.guardians.service: "grades"
+    environment:
+      SERVICE_NAME: "grades"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/grades"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # enrollments-service (수강내역조회)
+  # ─────────────────────────────────────────
+  enrollments-service:
+    build:
+      context: .
+      dockerfile: services/enrollments-service/Dockerfile
+    container_name: enrollments-service
+    labels:
+      com.guardians.service: "enrollments"
+    environment:
+      SERVICE_NAME: "enrollments"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/enrollments"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # registrations-service (등록금납부조회)
+  # ─────────────────────────────────────────
+  registrations-service:
+    build:
+      context: .
+      dockerfile: services/registrations-service/Dockerfile
+    container_name: registrations-service
+    labels:
+      com.guardians.service: "registrations"
+    environment:
+      SERVICE_NAME: "registrations"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/registrations"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+networks:
+  zerotrust-net:
+    driver: bridge
+
+volumes:
+  spire-server-data:
+  spire-agent-data:
+  spire-agent-socket:
+  portal-data:

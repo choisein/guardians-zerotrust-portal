@@ -1,0 +1,7 @@
+# OPA Rego 정책 파일을 이 폴더에 추가하세요.
+# 각 서비스 미들웨어가 참조하는 패키지:
+#   - guardians/auth
+#   - guardians/profile
+#   - guardians/grades
+#   - guardians/enrollments
+#   - guardians/registrations

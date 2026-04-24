@@ -1,0 +1,5 @@
+flask==3.1.0
+flask-cors==5.0.1
+requests==2.32.3
+# pyspiffe 는 Python 3.12 환경 설치 이슈로 제외. shared/requirements.txt 주석 참고.
+# pyspiffe==0.1.0

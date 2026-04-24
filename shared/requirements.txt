@@ -1,0 +1,12 @@
+flask==3.1.0
+flask-cors==5.0.1
+flask-sqlalchemy==3.1.1
+pymysql==1.1.1
+python-dotenv==1.1.0
+cryptography==44.0.0
+requests==2.32.3
+# pyspiffe 는 Python 3.12 환경에서 설치가 불안정해 일단 제외합니다.
+# shared/spire_client.py 는 pyspiffe 없이도 DEV-SVID 더미 토큰으로 동작하며,
+# 미들웨어 → OPA 흐름은 동일하게 검증됩니다.
+# 실제 SPIRE SVID 흐름을 붙이려면 별도 이미지/WSL2 환경에서 아래 주석 해제:
+# pyspiffe==0.1.0
