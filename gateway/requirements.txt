@@ -1,5 +1,5 @@
+# gateway 전용 의존성. shared/requirements.txt 의 것을 모두 포함한 뒤
+# 게이트웨이만 쓰는 패키지를 추가합니다 (현재는 shared 만으로 충분).
 flask==3.1.0
 flask-cors==5.0.1
 requests==2.32.3
-# pyspiffe 는 Python 3.12 환경 설치 이슈로 제외. shared/requirements.txt 주석 참고.
-# pyspiffe==0.1.0

@@ -46,6 +46,14 @@ services:
     image: ghcr.io/spiffe/spire-agent:1.9.0
     container_name: spire-agent
     hostname: spire-agent
+    # docker WorkloadAttestor 가 워크로드 PID 의 /proc/<pid>/cgroup 을 읽어
+    # docker 컨테이너 ID 를 추출하려면:
+    #   - PID namespace 공유 (호스트의 모든 PID 를 봐야 함)
+    #   - cgroup namespace 공유 (cgroup 경로에 컨테이너 ID 가 박힌 풀패스를 봐야 함)
+    # 둘 다 host 로 설정. WSL2 백엔드 Docker Desktop 에서도 동일.
+    pid: host
+    cgroup: host
+    privileged: true
     depends_on:
       - spire-server
     # SPIRE 이미지는 distroless. ENTRYPOINT/CMD 합성 이슈를 피하기 위해
@@ -91,6 +99,7 @@ services:
   # API Gateway (SPIFFE: .../service/gateway)
   # ─────────────────────────────────────────
   gateway:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: gateway/Dockerfile
@@ -101,6 +110,7 @@ services:
       SERVICE_NAME: "gateway"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/gateway"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
       OPA_URL: "http://opa:8181"
       AUTH_URL: "http://auth-service:5001"
       PROFILE_URL: "http://profile-service:5002"
@@ -127,6 +137,7 @@ services:
   # auth-service (로그인)
   # ─────────────────────────────────────────
   auth-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: services/auth-service/Dockerfile
@@ -137,6 +148,8 @@ services:
       SERVICE_NAME: "auth"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/auth"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
       OPA_URL: "http://opa:8181"
       DATABASE_URL: "sqlite:////data/portal.db"
     volumes:
@@ -153,6 +166,7 @@ services:
   # profile-service (학적조회)
   # ─────────────────────────────────────────
   profile-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: services/profile-service/Dockerfile
@@ -163,6 +177,8 @@ services:
       SERVICE_NAME: "profile"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/profile"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
       OPA_URL: "http://opa:8181"
       DATABASE_URL: "sqlite:////data/portal.db"
     volumes:
@@ -179,6 +195,7 @@ services:
   # grades-service (성적조회)
   # ─────────────────────────────────────────
   grades-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: services/grades-service/Dockerfile
@@ -189,6 +206,8 @@ services:
       SERVICE_NAME: "grades"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/grades"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
       OPA_URL: "http://opa:8181"
       DATABASE_URL: "sqlite:////data/portal.db"
     volumes:
@@ -205,6 +224,7 @@ services:
   # enrollments-service (수강내역조회)
   # ─────────────────────────────────────────
   enrollments-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: services/enrollments-service/Dockerfile
@@ -215,6 +235,8 @@ services:
       SERVICE_NAME: "enrollments"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/enrollments"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
       OPA_URL: "http://opa:8181"
       DATABASE_URL: "sqlite:////data/portal.db"
     volumes:
@@ -231,6 +253,7 @@ services:
   # registrations-service (등록금납부조회)
   # ─────────────────────────────────────────
   registrations-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: services/registrations-service/Dockerfile
@@ -241,6 +264,8 @@ services:
       SERVICE_NAME: "registrations"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/registrations"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
       OPA_URL: "http://opa:8181"
       DATABASE_URL: "sqlite:////data/portal.db"
     volumes:

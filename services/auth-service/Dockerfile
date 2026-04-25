@@ -9,9 +9,9 @@ FROM python:3.11
 
 WORKDIR /app
 
-# pyspiffe → grpcio 가 wheel 없는 경우를 대비해 빌드 툴 설치.
+# spiffe 가 pull 하는 grpcio / cryptography 등이 wheel 없으면 소스 빌드로 떨어질 때를 대비.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends gcc g++ python3-dev libffi-dev \
+ && apt-get install -y --no-install-recommends gcc g++ python3-dev libffi-dev libssl-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # shared + 서비스 소스 복사

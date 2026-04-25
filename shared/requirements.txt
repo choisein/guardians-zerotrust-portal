@@ -1,12 +1,25 @@
+# ─────────────────────────────────────────────────────────────
+# 공통 파이썬 의존성 (모든 마이크로서비스가 사용)
+# ─────────────────────────────────────────────────────────────
+# Python 3.11 컨테이너 (python:3.11 이미지) 기준으로 검증된 핀.
+#
+# SPIFFE/SPIRE 연동:
+#   - PyPI 패키지 이름은 "spiffe" (예전 "pyspiffe" 는 deprecated)
+#   - spiffe 0.2.7 은 cryptography 46.x, pyjwt 2.x 를 요구하므로
+#     기존 cryptography==44 핀을 함께 올려야 합니다.
+#   - SPIFFE Workload API 소켓은 SPIFFE_ENDPOINT_SOCKET 환경변수로 지정
+#     (docker-compose 에서 unix:///run/spire/agent/public/api.sock 마운트).
+# ─────────────────────────────────────────────────────────────
 flask==3.1.0
 flask-cors==5.0.1
 flask-sqlalchemy==3.1.1
 pymysql==1.1.1
 python-dotenv==1.1.0
-cryptography==44.0.0
 requests==2.32.3
-# pyspiffe 는 Python 3.12 환경에서 설치가 불안정해 일단 제외합니다.
-# shared/spire_client.py 는 pyspiffe 없이도 DEV-SVID 더미 토큰으로 동작하며,
-# 미들웨어 → OPA 흐름은 동일하게 검증됩니다.
-# 실제 SPIRE SVID 흐름을 붙이려면 별도 이미지/WSL2 환경에서 아래 주석 해제:
-# pyspiffe==0.1.0
+
+# SPIFFE 신규 SDK + 호환되는 보안 라이브러리들
+spiffe==0.2.7
+cryptography>=46,<47
+pyjwt[crypto]>=2.8,<2.13
+grpcio>=1.78.0,<2
+protobuf>=6.31.1,<8
