@@ -17,6 +17,8 @@ RUN apt-get update \
 # shared + 서비스 소스 복사
 COPY shared/ /app/shared/
 COPY services/auth-service/ /app/
+# 시드 SQL — auth-service 가 빈 DB 일 때 자동 로드 (shared/seed.py 가 사용)
+COPY db/ /app/db/
 
 # 의존성 설치 (shared 와 서비스 공통)
 RUN pip install --no-cache-dir --upgrade pip \
