@@ -10,6 +10,10 @@
 
 package guardians.common
 
+# OPA 0.66+ 에서 `if`, `in`, `contains`, `every` 키워드 사용 활성화.
+# (없으면 모든 `allow if {...}` 가 파싱 실패함)
+import rego.v1
+
 # 신뢰할 수 있는 호출자 (게이트웨이만 각 서비스를 호출할 수 있음)
 trusted_callers := {
     "spiffe://guardians.local/service/gateway",

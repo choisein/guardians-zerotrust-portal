@@ -18,6 +18,7 @@
 
 package guardians.grades
 
+import rego.v1
 import data.guardians.common
 
 default allow := false

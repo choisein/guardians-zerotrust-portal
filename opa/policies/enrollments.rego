@@ -15,6 +15,7 @@
 
 package guardians.enrollments
 
+import rego.v1
 import data.guardians.common
 
 default allow := false

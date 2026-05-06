@@ -13,6 +13,7 @@
 
 package guardians.auth
 
+import rego.v1
 import data.guardians.common
 
 # 기본값: 거부 (제로트러스트 원칙)

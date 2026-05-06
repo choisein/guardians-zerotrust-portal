@@ -16,6 +16,7 @@
 
 package guardians.profile
 
+import rego.v1
 import data.guardians.common
 
 default allow := false

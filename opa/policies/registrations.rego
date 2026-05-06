@@ -16,6 +16,7 @@
 
 package guardians.registrations
 
+import rego.v1
 import data.guardians.common
 
 default allow := false

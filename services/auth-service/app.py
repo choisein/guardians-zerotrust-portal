@@ -22,6 +22,7 @@ sys.path.insert(0, "/app")
 
 from shared.models import db
 from shared.config import BaseConfig
+from shared.seed import seed_if_empty
 from routes.auth import auth_bp
 
 
@@ -48,5 +49,11 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         db.create_all()
+        # 빈 DB 면 sample SQL 을 읽어 초기 시드 적재.
+        # 이미 데이터가 있으면 아무 일도 안 함.
+        try:
+            seed_if_empty()
+        except Exception as e:
+            print(f"⚠️ seed_if_empty 실패: {e}")
     print(f"🔐 Auth Service (SPIFFE: {os.environ.get('SERVICE_SPIFFE_ID')}) on :5001")
     app.run(host="0.0.0.0", port=5001, debug=True)
