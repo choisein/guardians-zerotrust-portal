@@ -117,8 +117,14 @@ services:
       GRADES_URL: "http://grades-service:5003"
       ENROLLMENTS_URL: "http://enrollments-service:5004"
       REGISTRATIONS_URL: "http://registrations-service:5005"
+      # critical_violation 시 spire-server entry 를 docker exec 로 삭제하기 위해 필요
+      SPIRE_SERVER_CONTAINER: "spire-server"
     volumes:
       - spire-agent-socket:/run/spire/agent/public:ro
+      # 게이트웨이가 critical_violation 탐지 시 spire-server CLI 를 호출해
+      # entry 를 삭제할 수 있도록 docker 데몬 소켓을 마운트한다.
+      # (시연 편의를 위한 구성이며, 운영에서는 별도 revoker 사이드카 권장)
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "5000:5000"
     depends_on:

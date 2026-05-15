@@ -1,20 +1,21 @@
 """
-shared/middleware.py - 요청 인증/인가 미들웨어 (OPA 이상탐지 확장판)
+shared/middleware.py - 요청 인증/인가 미들웨어 (OPA 이상탐지 + critical 폐기)
 ──────────────────────────────────────────────────────────────────────
 모든 마이크로서비스는 다음 순서로 요청을 검증합니다.
 
   1) SVID 검증 (SPIFFE)
-     - 호출자(게이트웨이 등)가 보낸 JWT-SVID를 Workload API로 검증
-     - spiffe://guardians.local/... 형태의 caller ID를 추출
+     - 호출자(게이트웨이 등)가 보낸 JWT-SVID 를 Workload API 로 검증
+     - spiffe://guardians.local/... 형태의 caller ID 를 추출
+     - blocklist (즉시 무효화 목록) 도 함께 확인
 
   2) 세션 검증 (Flask session / 쿠키)
      - 최종 사용자가 로그인 상태인지 확인
 
-  3) OPA 인가 질의
-     - caller_spiffe_id, user role, method, path, context를 input으로 질의
-     - 거부되면 403 반환
+  3) OPA 인가 질의 (allow + critical_violation 동시 평가)
+     - critical_violation == true: SPIRE entry 즉시 삭제 + blocklist 등록
+     - allow == false           : 일반 deny (entry 유지)
 
-[추가] context 필드:
+context 필드:
   - hour: 현재 시각(0~23) - 시간대 기반 이상탐지용
   - recent_request_count: 최근 10초간 동일 사용자 요청 수 - 대량조회 탐지용
   - timestamp: 현재 시각 ISO 문자열 (로깅/감사용)
@@ -33,7 +34,7 @@ from threading import Lock
 
 from flask import request, session, jsonify, g
 
-from .spire_client import get_spire_client
+from .spire_client import get_spire_client, revoke_entry
 from .opa_client import get_opa_client
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,7 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
             my_spiffe_id = os.environ.get("SERVICE_SPIFFE_ID", "")
 
             # 1) SVID 검증 (헤더 X-SVID 로 전달)
+            #    spire_client.validate_jwt_svid 내부에서 blocklist 도 확인한다.
             svid_token = request.headers.get("X-SVID")
             caller_spiffe_id = None
 
@@ -101,7 +103,6 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
                 return jsonify({"error": "로그인이 필요합니다."}), 401
 
             # 3) 이상행동 탐지용 context 수집
-            #    - 사용자가 있으면 user_id 기준, 없으면 IP 기준으로 카운트
             user_key = user_id or request.remote_addr or "anonymous"
             recent_count = _record_and_count_recent(user_key)
 
@@ -113,7 +114,7 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
                 "recent_request_count": recent_count,
             }
 
-            # 4) OPA 인가 질의
+            # 4) OPA 인가 질의 (allow + critical_violation 동시)
             opa_input = {
                 "caller_spiffe_id": caller_spiffe_id,
                 "service_spiffe_id": my_spiffe_id,
@@ -124,8 +125,26 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
                 "context": context,
             }
             opa = get_opa_client()
-            if not opa.check(policy_package, opa_input):
-                logger.warning(f"OPA 거부: {opa_input}")
+            decision = opa.evaluate(policy_package, opa_input)
+
+            # 4-a) critical_violation: 단순 거부가 아니라 신원 신뢰 박탈
+            #      → 호출자(caller_spiffe_id) 의 SPIRE entry 를 즉시 삭제
+            #      → 동시에 blocklist 에 등록되어 기존 SVID 도 즉시 무효화
+            if decision.get("critical_violation"):
+                logger.error(
+                    "[CRITICAL] 신뢰 박탈 사유 탐지 → entry 삭제 시도: "
+                    "caller=%s policy=%s input=%s",
+                    caller_spiffe_id, policy_package, opa_input,
+                )
+                revoke_entry(caller_spiffe_id)
+                return jsonify({
+                    "error": "critical_violation 으로 SVID 가 폐기되었습니다.",
+                    "reason": "critical_violation",
+                }), 403
+
+            # 4-b) 일반 deny: 접근 통제만 (entry 유지)
+            if not decision.get("allow"):
+                logger.warning("OPA 거부: %s", opa_input)
                 return jsonify({"error": "정책에 의해 거부됨"}), 403
 
             return fn(*args, **kwargs)

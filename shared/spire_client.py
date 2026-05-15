@@ -6,28 +6,33 @@ shared/spire_client.py - SPIRE Workload API 클라이언트
 
 SVID 는 짧은 수명(기본 1시간)을 가지며 주기적으로 자동 갱신됩니다.
 
-이 모듈은 PyPI 패키지 ``spiffe`` (구 ``pyspiffe``) 0.2.x 를 감싸서 단순한
-인터페이스를 노출합니다. ``spiffe`` 가 설치되지 않은 환경(로컬 IDE 등)
-에서도 import 만으로 죽지 않도록 graceful fallback 을 두었습니다.
-
 주요 메서드:
   - ``fetch_jwt_svid(audience)``        : 호출 대상 서비스용 JWT-SVID 발급
-  - ``validate_jwt_svid(token, aud)``   : 수신한 JWT-SVID 검증
+  - ``validate_jwt_svid(token, aud)``   : 수신한 JWT-SVID 검증 (+blocklist 차단)
+  - ``revoke_entry(spiffe_id)``         : SPIRE entry 삭제 + blocklist 등록
+  - ``is_revoked(spiffe_id)``           : 즉시 무효화 여부 확인
   - ``close()``                         : 백그라운드 스트림 정리
 
+[즉시 무효화]
+  SPIRE entry 를 삭제해도 이미 발급된 JWT/X.509-SVID 는 만료까지 유효하다.
+  ``revoke_entry`` 는 entry 삭제와 동시에 SPIFFE ID 를 in-memory blocklist
+  에 추가하고, ``validate_jwt_svid`` 는 검증 시 blocklist 를 먼저 본다.
+  이렇게 함으로써 'entry 삭제 = SVID 즉시 무효화' 가 수신자 측에서 강제된다.
+  (멀티 호스트로 확장할 경우 Redis 등 외부 저장소로 교체할 것)
+
 환경변수:
-  - ``SPIFFE_ENDPOINT_SOCKET``     : Workload API Unix Socket
-                                    (예: unix:///run/spire/agent/public/api.sock)
-  - ``SPIRE_AGENT_SOCKET``         : 위와 동일. 둘 중 아무거나 설정해도 됨.
-                                    SPIFFE_ENDPOINT_SOCKET 이 우선.
-  - ``SERVICE_SPIFFE_ID``          : 이 프로세스가 가지는 SPIFFE ID
-                                    (예: spiffe://guardians.local/service/profile)
+  - SPIFFE_ENDPOINT_SOCKET   : Workload API Unix Socket
+  - SPIRE_AGENT_SOCKET       : 위와 동일 (호환용)
+  - SERVICE_SPIFFE_ID        : 이 프로세스가 가지는 SPIFFE ID
+  - SPIRE_SERVER_CONTAINER   : SPIRE Server 컨테이너 이름 (entry 삭제 시 사용)
+  - SPIRE_SERVER_BIN         : SPIRE Server CLI 경로
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import subprocess
 import threading
 from typing import Optional
 
@@ -39,7 +44,7 @@ logger = logging.getLogger(__name__)
 try:
     from spiffe import JwtSource, JwtSvid, SpiffeId, TrustDomain  # type: ignore
     SPIFFE_AVAILABLE = True
-except ImportError:  # 로컬에서 설치 안 됐을 때
+except ImportError:
     SPIFFE_AVAILABLE = False
     JwtSource = None  # type: ignore
     JwtSvid = None  # type: ignore
@@ -51,12 +56,7 @@ except ImportError:  # 로컬에서 설치 안 됐을 때
     )
 
 
-# ──────────────────────────────────────────────────────────────────
-# 헬퍼
-# ──────────────────────────────────────────────────────────────────
 def _resolve_socket_path() -> str:
-    """SPIFFE_ENDPOINT_SOCKET 환경변수를 우선 사용하고,
-    없으면 호환용 SPIRE_AGENT_SOCKET, 그것도 없으면 기본값을 반환."""
     return (
         os.environ.get("SPIFFE_ENDPOINT_SOCKET")
         or os.environ.get("SPIRE_AGENT_SOCKET")
@@ -65,17 +65,41 @@ def _resolve_socket_path() -> str:
 
 
 # ──────────────────────────────────────────────────────────────────
+# SPIFFE ID Blocklist (즉시 무효화)
+# ──────────────────────────────────────────────────────────────────
+# entry 가 삭제되어도 기존에 발급된 SVID 는 만료까지 유효하기 때문에,
+# 수신 측에서 검증 시 차단 목록을 한 번 더 확인해 즉시 무효화를 보장한다.
+_revoked_spiffe_ids: set[str] = set()
+_revoked_lock = threading.Lock()
+
+
+def add_to_blocklist(spiffe_id: str) -> None:
+    """SPIFFE ID 를 즉시 무효화 목록에 등록한다."""
+    if not spiffe_id:
+        return
+    with _revoked_lock:
+        _revoked_spiffe_ids.add(spiffe_id)
+    logger.warning("[BLOCKLIST] SPIFFE ID 차단 등록: %s", spiffe_id)
+
+
+def is_revoked(spiffe_id: str) -> bool:
+    """SPIFFE ID 가 차단 목록에 있는지 확인한다."""
+    if not spiffe_id:
+        return False
+    with _revoked_lock:
+        return spiffe_id in _revoked_spiffe_ids
+
+
+def clear_blocklist() -> None:
+    """테스트/디버깅용: 차단 목록 초기화."""
+    with _revoked_lock:
+        _revoked_spiffe_ids.clear()
+
+
+# ──────────────────────────────────────────────────────────────────
 # 클라이언트 본체
 # ──────────────────────────────────────────────────────────────────
 class SpireClient:
-    """프로세스당 1 개만 만들어 재사용한다.
-
-    내부적으로 ``JwtSource`` 가 백그라운드 gRPC 스트림을 유지하면서
-    JWT 번들을 자동으로 갱신한다. 첫 번째 업데이트가 도착할 때까지는
-    ``JwtSource`` 생성자가 블로킹되므로 ``timeout_in_seconds`` 를 지정해
-    Agent 가 아직 안 떠있을 때 무한 대기하지 않도록 한다.
-    """
-
     DEFAULT_INIT_TIMEOUT = float(os.environ.get("SPIFFE_INIT_TIMEOUT", "10"))
 
     def __init__(self, socket_path: str, service_spiffe_id: str):
@@ -84,9 +108,6 @@ class SpireClient:
         self._jwt_source: Optional["JwtSource"] = None
         self._lock = threading.Lock()
 
-    # ──────────────────────────────────────
-    # 내부: JwtSource 지연 초기화
-    # ──────────────────────────────────────
     def _ensure_source(self) -> Optional["JwtSource"]:
         if not SPIFFE_AVAILABLE:
             return None
@@ -95,8 +116,6 @@ class SpireClient:
         with self._lock:
             if self._jwt_source is not None:
                 return self._jwt_source
-            # spiffe 라이브러리는 SPIFFE_ENDPOINT_SOCKET 를 보거나
-            # 생성자 인자로 받은 socket_path 를 본다. 둘 다 세팅해 둔다.
             os.environ["SPIFFE_ENDPOINT_SOCKET"] = self.socket_path
             try:
                 self._jwt_source = JwtSource(
@@ -105,31 +124,20 @@ class SpireClient:
                 )
                 logger.info(
                     "JwtSource 초기화 완료 (socket=%s, spiffe_id=%s)",
-                    self.socket_path,
-                    self.service_spiffe_id,
+                    self.socket_path, self.service_spiffe_id,
                 )
             except Exception as e:
                 logger.error("JwtSource 초기화 실패: %s", e)
                 self._jwt_source = None
             return self._jwt_source
 
-    # ──────────────────────────────────────
-    # JWT-SVID 발급 (호출자 → 상대 서비스)
-    # ──────────────────────────────────────
     def fetch_jwt_svid(self, audience: str) -> Optional[str]:
-        """호출 대상 서비스의 SPIFFE ID 를 audience 로 갖는 JWT-SVID 토큰을 반환.
-
-        ``spiffe`` 미설치 환경에서는 ``DEV-SVID-<from>-><aud>`` 더미 토큰을
-        반환해 미들웨어/OPA 흐름 테스트에는 지장 없도록 한다.
-        """
         if not SPIFFE_AVAILABLE:
             logger.warning("spiffe 미설치 - DEV 더미 토큰 발급")
             return f"DEV-SVID-{self.service_spiffe_id}->{audience}"
-
         source = self._ensure_source()
         if source is None:
             return None
-
         try:
             svid = source.fetch_svid(audience={audience})
             return svid.token
@@ -137,11 +145,9 @@ class SpireClient:
             logger.error("JWT-SVID 발급 실패 (audience=%s): %s", audience, e)
             return None
 
-    # ──────────────────────────────────────
-    # JWT-SVID 검증 (수신자 측)
-    # ──────────────────────────────────────
     def validate_jwt_svid(self, token: str, expected_audience: str) -> Optional[dict]:
-        """수신한 JWT-SVID 를 검증하고 호출자 SPIFFE ID 를 반환."""
+        """수신한 JWT-SVID 를 검증하고 호출자 SPIFFE ID 를 반환.
+        blocklist 에 있으면 서명·만료가 유효해도 즉시 거부한다."""
         if not token:
             return None
 
@@ -151,6 +157,12 @@ class SpireClient:
                 try:
                     _, rest = token.split("DEV-SVID-", 1)
                     caller_id, _ = rest.split("->", 1)
+                    if is_revoked(caller_id):
+                        logger.warning(
+                            "[BLOCKLIST] 폐기된 SPIFFE ID 의 DEV-SVID 거부: %s",
+                            caller_id,
+                        )
+                        return None
                     return {"spiffe_id": caller_id, "expiry": None}
                 except ValueError:
                     return None
@@ -161,7 +173,6 @@ class SpireClient:
             return None
 
         try:
-            # 1) 헤더에서 SPIFFE ID 를 미리 꺼내서 trust domain 파악
             insecure = JwtSvid.parse_insecure(token, audience={expected_audience})
             trust_domain: TrustDomain = insecure.spiffe_id.trust_domain
             jwt_bundle = source.get_bundle_for_trust_domain(trust_domain)
@@ -172,14 +183,21 @@ class SpireClient:
                 )
                 return None
 
-            # 2) 실제 서명/만료/audience 검증
             svid = JwtSvid.parse_and_validate(
                 token=token,
                 jwt_bundle=jwt_bundle,
                 audience={expected_audience},
             )
+            caller_id = str(svid.spiffe_id)
+            # 서명·만료가 유효하더라도 blocklist 에 있으면 즉시 거부
+            if is_revoked(caller_id):
+                logger.warning(
+                    "[BLOCKLIST] 폐기된 SPIFFE ID 의 JWT-SVID 거부: %s",
+                    caller_id,
+                )
+                return None
             return {
-                "spiffe_id": str(svid.spiffe_id),
+                "spiffe_id": caller_id,
                 "expiry": svid.expiry,
                 "audience": list(svid.audience),
             }
@@ -187,9 +205,6 @@ class SpireClient:
             logger.warning("JWT-SVID 검증 실패: %s", e)
             return None
 
-    # ──────────────────────────────────────
-    # 정리
-    # ──────────────────────────────────────
     def close(self) -> None:
         if self._jwt_source is not None:
             try:
@@ -217,3 +232,69 @@ def get_spire_client() -> SpireClient:
                 service_spiffe_id=os.environ.get("SERVICE_SPIFFE_ID", ""),
             )
         return _client
+
+
+# ──────────────────────────────────────────────────────────────────
+# SPIRE Server admin: entry 삭제 (critical_violation 시 호출)
+# ──────────────────────────────────────────────────────────────────
+SPIRE_SERVER_CONTAINER = os.environ.get("SPIRE_SERVER_CONTAINER", "spire-server")
+SPIRE_SERVER_BIN = os.environ.get("SPIRE_SERVER_BIN", "/opt/spire/bin/spire-server")
+
+
+def _spire_server_exec(args: list[str]) -> Optional[str]:
+    """docker exec spire-server /opt/spire/bin/spire-server ... 를 실행."""
+    cmd = ["docker", "exec", SPIRE_SERVER_CONTAINER, SPIRE_SERVER_BIN] + args
+    try:
+        out = subprocess.run(
+            cmd, capture_output=True, text=True, check=True, timeout=5
+        )
+        return out.stdout
+    except FileNotFoundError:
+        logger.error("docker CLI 가 없어 SPIRE entry 명령을 실행할 수 없습니다.")
+        return None
+    except subprocess.CalledProcessError as e:
+        logger.error("spire-server 호출 실패: %s", e.stderr.strip())
+        return None
+    except subprocess.TimeoutExpired:
+        logger.error("spire-server 호출 타임아웃")
+        return None
+
+
+def find_entry_id(spiffe_id: str) -> Optional[str]:
+    """SPIFFE ID 로 등록된 SPIRE entry 의 Entry ID 를 찾는다."""
+    out = _spire_server_exec(["entry", "show", "-spiffeID", spiffe_id])
+    if not out:
+        return None
+    for line in out.splitlines():
+        if line.strip().startswith("Entry ID"):
+            return line.split(":", 1)[1].strip()
+    return None
+
+
+def revoke_entry(spiffe_id: str) -> bool:
+    """SPIFFE ID 의 SPIRE entry 를 삭제하고 즉시 차단 목록에 등록한다.
+
+    1) blocklist 등록 → 이미 발급되어 살아 있는 기존 SVID 도 수신자 측
+                       검증에서 즉시 거부됨 ("즉시 무효화")
+    2) entry 삭제   → 이후 신규 SVID 발급은 SPIRE 측에서 자동 차단됨
+
+    Returns:
+        True  : entry 삭제 + blocklist 등록 성공
+        False : entry 가 없거나 삭제 실패 (이 경우에도 blocklist 에는 등록됨)
+    """
+    if not spiffe_id:
+        return False
+    # 어떤 경우든 즉시 무효화 효과는 보장하기 위해 blocklist 부터 등록
+    add_to_blocklist(spiffe_id)
+    entry_id = find_entry_id(spiffe_id)
+    if not entry_id:
+        logger.warning("[REVOKE] entry 없음 (이미 폐기됨?): %s", spiffe_id)
+        return False
+    out = _spire_server_exec(["entry", "delete", "-entryID", entry_id])
+    if out is None:
+        return False
+    logger.warning(
+        "[REVOKE] SVID 폐기 완료: %s (entry=%s, blocklist 등록됨)",
+        spiffe_id, entry_id,
+    )
+    return True
