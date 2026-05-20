@@ -35,7 +35,10 @@ is_from_gateway if {
 is_student if {
     input.user.role == "student"
 }
-
+# 사용자가 교수 역할인지
+is_professor if {
+	input.user.role == "professor"
+}
 # 사용자가 관리자 역할인지
 is_admin if {
     input.user.role == "admin"
