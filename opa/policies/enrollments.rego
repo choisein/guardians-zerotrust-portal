@@ -20,17 +20,54 @@ import data.guardians.common
 
 default allow := false
 
-allow if {
-    common.is_from_gateway
-    common.is_logged_in
-    common.is_read_method
-    common.is_student
-    common.is_self_access
+# ═══════════════════════════════════════════════════════════════
+# 외부/내부 요청 판단
+# ═══════════════════════════════════════════════════════════════
+
+# 외부 클라이언트 요청 (Gateway를 통함)
+is_external_request if {
+	input.source == "gateway"
 }
 
+# 내부 서비스 호출 (mTLS/SPIRE를 통함)
+is_internal_service_call if {
+	input.source == "service"
+	input.caller_service  # "grades-service", "audit-service" 등
+}
+# ═══════════════════════════════════════════════════════════════
+# 외부 요청 인가 규칙
+# ═══════════════════════════════════════════════════════════════
+
+# 학생: 본인의 수강내역만 조회
 allow if {
-    common.is_from_gateway
-    common.is_logged_in
-    common.is_read_method
-    common.is_admin
+	is_external_request
+	common.is_logged_in
+	common.is_read_method
+	common.is_student
+	common.is_self_access
+}
+
+# 관리자: 모든 학생의 수강내역 조회
+allow if {
+	is_external_request
+	common.is_logged_in
+	common.is_read_method
+	common.is_admin
+}
+# ═══════════════════════════════════════════════════════════════
+# 내부 요청 인가 규칙
+# ═══════════════════════════════════════════════════════════════
+
+# Grades Service: 학생의 수강내역 확인 (읽기만)
+allow if {
+	is_internal_service_call
+	input.caller_service == "grades-service"
+	common.is_read_method
+}
+
+# Audit Service: 학생의 수강내역 감시 (읽기 + 로깅)
+allow if {
+	is_internal_service_call
+	input.caller_service == "audit-service"
+	(common.is_read_method | common.is_write_method)
 }
