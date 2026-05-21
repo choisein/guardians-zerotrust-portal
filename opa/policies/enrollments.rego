@@ -32,7 +32,7 @@ is_external_request if {
 # 내부 서비스 호출 (mTLS/SPIRE를 통함)
 is_internal_service_call if {
 	input.source == "service"
-	input.caller_service  # "grades-service", "audit-service" 등
+	input.caller_service
 }
 # ═══════════════════════════════════════════════════════════════
 # 외부 요청 인가 규칙
@@ -76,10 +76,4 @@ allow if {
 	is_internal_service_call
 	input.caller_service == "registrations-service"
 	common.is_read_method
-}
-# Audit Service: 학생의 수강내역 감시 (읽기 + 로깅)
-allow if {
-	is_internal_service_call
-	input.caller_service == "audit-service"
-	(common.is_read_method | common.is_write_method)
 }
