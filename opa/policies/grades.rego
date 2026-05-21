@@ -41,10 +41,14 @@ is_internal_service_call if {
 	input.source == "service"
 	input.caller_service
 }
+
 # ──────────────────────────────────────────────────────────────
+# 외부 요청 (Gateway)
+# ──────────────────────────────────────────────────────────────
+
 # 학생: 본인 성적만
 allow if {
-	common.is_from_gateway
+	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_student
@@ -54,14 +58,31 @@ allow if {
 
 # 관리자: 전체 조회 가능
 allow if {
-	common.is_from_gateway
+	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_admin
 	not is_suspicious_pattern
 }
+# ──────────────────────────────────────────────────────────────
+# 내부 요청 (mTLS/SPIRE)
+# ──────────────────────────────────────────────────────────────
+# Enrollment Service: 학생 성적 조회 (수강 확인, 선수과목 검증)
+allow if {
+	is_internal_service_call
+	input.caller_service == "enrollments-service"
+	common.is_read_method
+}
 
-# ── 이상 행동 탐지 ──────────────────────────────────────────
+# Audit Service: 감시/로깅
+allow if {
+	is_internal_service_call
+	input.caller_service == "audit-service"
+}
+
+# ──────────────────────────────────────────────────────────────
+# 이상 행동 탐지 
+# ──────────────────────────────────────────────────────────────
 # 단시간 내 대량 조회 (10초 내 20회 초과)
 is_suspicious_pattern if {
 	input.context.recent_request_count > 20
@@ -87,9 +108,10 @@ is_suspicious_pattern if {
 	input.request.bulk_export == true
 	input.reason := "Bulk data export attempt"
 }
-
-# ── Critical violation (신원 신뢰 박탈 사유) ────────────────
+# ──────────────────────────────────────────────────────────────
+# Critical violation (신원 신뢰 박탈 사유) 
 # deny 와 달리 단순 차단이 아니라 SPIRE entry 삭제로 이어진다.
+# ──────────────────────────────────────────────────────────────
 
 # Critical 1: 본인이 아닌 학번의 성적 조회 시도
 critical_violation if {
