@@ -64,7 +64,19 @@ allow if {
 	input.caller_service == "grades-service"
 	common.is_read_method
 }
+# Profile Service: 학생 정보 조회 (읽기만)
+allow if {
+	is_internal_service_call
+	input.caller_service == "profile-service"
+	common.is_read_method
+}
 
+# Registration Service: 등록금 상태 확인 (읽기만)
+allow if {
+	is_internal_service_call
+	input.caller_service == "registrations-service"
+	common.is_read_method
+}
 # Audit Service: 학생의 수강내역 감시 (읽기 + 로깅)
 allow if {
 	is_internal_service_call
