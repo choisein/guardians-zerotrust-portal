@@ -64,6 +64,7 @@ allow if {
 	common.is_admin
 	not is_suspicious_pattern
 }
+
 # ──────────────────────────────────────────────────────────────
 # 내부 요청 (mTLS/SPIRE)
 # ──────────────────────────────────────────────────────────────
@@ -72,12 +73,6 @@ allow if {
 	is_internal_service_call
 	input.caller_service == "enrollments-service"
 	common.is_read_method
-}
-
-# Audit Service: 감시/로깅
-allow if {
-	is_internal_service_call
-	input.caller_service == "audit-service"
 }
 
 # ──────────────────────────────────────────────────────────────
