@@ -9,6 +9,7 @@ from flask import Blueprint, request, jsonify, session
 
 from shared.models import StudentProfile
 from shared.middleware import zero_trust_required
+from shared.service_client import call_service, response_summary
 
 profile_bp = Blueprint("profile", __name__, url_prefix="/api/student")
 
@@ -43,3 +44,21 @@ def get_profile():
     if not profile:
         return jsonify({"error": "학생 정보를 찾을 수 없습니다."}), 404
     return jsonify(profile.to_dict()), 200
+
+
+# ──────────────────────────────────────────────────────────────
+# [데모] 서비스 간 직접 호출 — 횡적 이동(lateral movement) 시도
+# profile 은 호출 그래프상 다른 서비스를 호출할 수 없는 leaf 이다.
+# profile 이 grades 를 직접 호출하면 grades 의 OPA 가 critical_violation
+# 으로 판정 → profile 의 SVID 가 즉시 폐지된다.
+# ──────────────────────────────────────────────────────────────
+@profile_bp.route("/profile/internal/grades", methods=["GET"])
+@zero_trust_required(policy_package="guardians/profile")
+def demo_profile_calls_grades():
+    resp = call_service("grades", "/api/student/grades", cookies=request.cookies)
+    status = resp.status_code if resp is not None else 502
+    return jsonify({
+        "demo": "profile -> grades (횡적 이동 시도)",
+        "expected": "그래프 이탈 → critical_violation → profile SVID 즉시 폐지",
+        "downstream": response_summary(resp),
+    }), status

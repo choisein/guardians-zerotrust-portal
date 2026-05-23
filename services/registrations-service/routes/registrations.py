@@ -9,6 +9,7 @@ from flask import Blueprint, request, jsonify, session
 
 from shared.models import Registration, StudentProfile
 from shared.middleware import zero_trust_required
+from shared.service_client import call_service, response_summary
 
 registrations_bp = Blueprint("registrations", __name__, url_prefix="/api/student")
 
@@ -44,3 +45,33 @@ def get_registrations():
         "student_id": student_id,
         "registrations": [r.to_dict() for r in registrations],
     }), 200
+
+
+# ──────────────────────────────────────────────────────────────
+# [데모] 서비스 간 직접 호출
+#   허용: registrations -> enrollments (등록금 산정용 수강 학점 확인)
+#   횡적 이동: registrations -> grades (금융→학사 침투, 그래프 이탈)
+#             → grades 의 OPA 가 critical → registrations SVID 즉시 폐지
+# ──────────────────────────────────────────────────────────────
+@registrations_bp.route("/registrations/internal/enrollments", methods=["GET"])
+@zero_trust_required(policy_package="guardians/registrations")
+def demo_registrations_calls_enrollments():
+    resp = call_service("enrollments", "/api/student/enrollments", cookies=request.cookies)
+    status = resp.status_code if resp is not None else 502
+    return jsonify({
+        "demo": "registrations -> enrollments (등록금 산정)",
+        "expected": "허용 엣지 → allow (정상 조회)",
+        "downstream": response_summary(resp),
+    }), status
+
+
+@registrations_bp.route("/registrations/internal/grades", methods=["GET"])
+@zero_trust_required(policy_package="guardians/registrations")
+def demo_registrations_calls_grades():
+    resp = call_service("grades", "/api/student/grades", cookies=request.cookies)
+    status = resp.status_code if resp is not None else 502
+    return jsonify({
+        "demo": "registrations -> grades (금융→학사 횡적 이동 시도)",
+        "expected": "그래프 이탈 → critical_violation → registrations SVID 즉시 폐지",
+        "downstream": response_summary(resp),
+    }), status

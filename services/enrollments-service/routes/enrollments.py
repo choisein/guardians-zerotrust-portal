@@ -9,6 +9,7 @@ from flask import Blueprint, request, jsonify, session
 
 from shared.models import Enrollment, StudentProfile
 from shared.middleware import zero_trust_required
+from shared.service_client import call_service, response_summary
 
 enrollments_bp = Blueprint("enrollments", __name__, url_prefix="/api/student")
 
@@ -44,3 +45,32 @@ def get_enrollments():
         "student_id": student_id,
         "enrollments": [e.to_dict() for e in enrollments],
     }), 200
+
+
+# ──────────────────────────────────────────────────────────────
+# [데모] 서비스 간 직접 호출 — 허용된 호출 (allow)
+# enrollments 는 선수과목 확인을 위해 grades 를, 수강 자격 확인을 위해
+# profile 을 호출할 수 있다 (호출 그래프상 허용 엣지, 읽기만).
+# ──────────────────────────────────────────────────────────────
+@enrollments_bp.route("/enrollments/internal/grades", methods=["GET"])
+@zero_trust_required(policy_package="guardians/enrollments")
+def demo_enrollments_calls_grades():
+    resp = call_service("grades", "/api/student/grades", cookies=request.cookies)
+    status = resp.status_code if resp is not None else 502
+    return jsonify({
+        "demo": "enrollments -> grades (선수과목 확인)",
+        "expected": "허용 엣지 → allow (정상 조회)",
+        "downstream": response_summary(resp),
+    }), status
+
+
+@enrollments_bp.route("/enrollments/internal/profile", methods=["GET"])
+@zero_trust_required(policy_package="guardians/enrollments")
+def demo_enrollments_calls_profile():
+    resp = call_service("profile", "/api/student/profile", cookies=request.cookies)
+    status = resp.status_code if resp is not None else 502
+    return jsonify({
+        "demo": "enrollments -> profile (수강 자격 확인)",
+        "expected": "허용 엣지 → allow (정상 조회)",
+        "downstream": response_summary(resp),
+    }), status

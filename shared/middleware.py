@@ -48,6 +48,34 @@ _request_log: dict = defaultdict(lambda: deque(maxlen=100))
 _request_log_lock = Lock()
 ANOMALY_WINDOW_SECONDS = 10  # 최근 N초 이내 요청을 카운트
 
+# 게이트웨이 SPIFFE ID (외부 진입점). 이 신원은 절대 폐지하지 않는다.
+GATEWAY_SPIFFE_ID = os.environ.get(
+    "GATEWAY_SPIFFE_ID", "spiffe://guardians.local/service/gateway"
+)
+
+
+def _derive_source(caller_spiffe_id: str):
+    """검증된 caller_spiffe_id 로부터 요청 출처를 분류한다.
+
+    Returns:
+        (source, caller_service)
+        - source        : "gateway" (외부 진입점/개발모드) | "service" (서비스 간 내부 호출)
+        - caller_service : 내부 호출일 때 호출 서비스 이름 (예 "enrollments-service"),
+                           게이트웨이/개발모드면 None
+
+    정책(rego)은 이 source/caller_service 로 외부 요청과 서비스 간 호출을 구분하고,
+    허용된 호출 그래프를 벗어난 내부 호출을 critical_violation 으로 판정한다.
+    """
+    if not caller_spiffe_id or caller_spiffe_id in (GATEWAY_SPIFFE_ID, "dev-local"):
+        return "gateway", None
+    # SVID 의 SPIFFE ID 끝 세그먼트는 "enrollments" 형태이고,
+    # OPA 정책의 caller_service 규칙은 "enrollments-service" 형태이므로
+    # 접미사를 맞춰 정책과 동일한 서비스 이름으로 변환한다.
+    # 예) spiffe://guardians.local/service/enrollments → "enrollments-service"
+    short = caller_spiffe_id.rsplit("/", 1)[-1]
+    caller_service = f"{short}-service"
+    return "service", caller_service
+
 
 def _record_and_count_recent(user_key: str) -> int:
     """현재 요청을 기록하고, 최근 ANOMALY_WINDOW_SECONDS 초간 요청 수를 반환."""
@@ -115,9 +143,14 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
             }
 
             # 4) OPA 인가 질의 (allow + critical_violation 동시)
+            #    검증된 caller_spiffe_id 로 요청 출처(외부/내부)를 파생해 전달한다.
+            #    → rego 정책이 호출 그래프 이탈을 판정할 수 있게 된다.
+            source, caller_service = _derive_source(caller_spiffe_id)
             opa_input = {
                 "caller_spiffe_id": caller_spiffe_id,
                 "service_spiffe_id": my_spiffe_id,
+                "source": source,
+                "caller_service": caller_service,
                 "user": {"user_id": user_id, "role": user_role},
                 "method": request.method,
                 "path": request.path,
@@ -131,10 +164,26 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
             #      → 호출자(caller_spiffe_id) 의 SPIRE entry 를 즉시 삭제
             #      → 동시에 blocklist 에 등록되어 기존 SVID 도 즉시 무효화
             if decision.get("critical_violation"):
+                # 게이트웨이 신원(외부 진입점)은 절대 폐지하지 않는다.
+                # 폐지하면 전체 시스템의 출입구가 막히기 때문이다.
+                # 이 경우는 SVID 폐지 없이 거부만 수행한다.
+                if source == "gateway":
+                    logger.error(
+                        "[CRITICAL] 게이트웨이 경유 요청에서 critical 탐지 → "
+                        "SVID 폐지 생략(게이트웨이 보호), 거부만 수행: policy=%s input=%s",
+                        policy_package, opa_input,
+                    )
+                    return jsonify({
+                        "error": "정책에 의해 거부됨",
+                        "reason": "critical_violation_denied",
+                    }), 403
+
+                # 서비스 간 호출이 허용된 호출 그래프를 벗어남(횡적 이동 신호)
+                # → 호출한 서비스의 SVID 를 즉시 폐지한다.
                 logger.error(
-                    "[CRITICAL] 신뢰 박탈 사유 탐지 → entry 삭제 시도: "
-                    "caller=%s policy=%s input=%s",
-                    caller_spiffe_id, policy_package, opa_input,
+                    "[CRITICAL] 서비스 간 호출 위반 탐지 → SVID 폐지: "
+                    "caller=%s caller_service=%s policy=%s input=%s",
+                    caller_spiffe_id, caller_service, policy_package, opa_input,
                 )
                 revoke_entry(caller_spiffe_id)
                 return jsonify({
