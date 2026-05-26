@@ -185,7 +185,20 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
                     "caller=%s caller_service=%s policy=%s input=%s",
                     caller_spiffe_id, caller_service, policy_package, opa_input,
                 )
+                # 기존 로직: SVID 실제 폐기
                 revoke_entry(caller_spiffe_id)
+                # 추가 로직: revocation-store 알림 전송
+                try:
+                    import requests
+                    requests.post(
+                            "http://revocation-store:6000/revoke",
+                            json={"spiffe_id": caller_spiffe_id},
+                            timeout=1
+                            )
+                    logger.info(f"[FAILOVER] {caller_spiffe_id} 차단 신호 전송")
+                except Exception as e:
+                    logger.error(f"[FAILOVER] 전송 실패: {e}")
+
                 return jsonify({
                     "error": "critical_violation 으로 SVID 가 폐기되었습니다.",
                     "reason": "critical_violation",
@@ -201,3 +214,4 @@ def zero_trust_required(policy_package: str, require_session: bool = True):
         return wrapper
 
     return decorator
+

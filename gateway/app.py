@@ -69,6 +69,11 @@ def route_service(path: str):
         return "registrations"
     return None
 
+REVOCATION_DIR = "/app/shared/revocation-store"
+
+def is_service_revoked(service_name: str) -> bool:
+    revoked_file = os.path.join(REVOCATION_DIR, f"{service_name}.revoked")
+    return os.path.exists(revoked_file)
 
 def create_app():
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -90,6 +95,11 @@ def create_app():
 
         upstream = UPSTREAMS[svc]
         target_url = f"{upstream['url']}{full_path}"
+        
+        # 폐지된 서비스 replica로 우회
+        if is_service_revoked(service_name):
+            target_url = target_url.replace(service_name, f"{service_name}-replica")
+            print(f"[FAILOVER] {service_name} → {target_url} 로 우회됨")
 
         # 이 요청을 처리할 서비스의 SPIFFE ID를 audience로 JWT-SVID 발급
         spire = get_spire_client()

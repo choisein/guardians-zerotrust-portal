@@ -284,6 +284,38 @@ services:
       - zerotrust-net
     restart: unless-stopped
 
+
+  # ─────────────────────────────────────────
+  # revocation-store (SVID 폐기/검증 저장소)
+  # ─────────────────────────────────────────
+  revocation-store:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/revocation-store/Dockerfile
+    container_name: revocation-store
+    labels:
+      com.guardians.service: "revocation-store"
+    environment:
+      SERVICE_NAME: "revocation-store"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/revocation-store"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    ports:
+      - "6000:6000"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
 networks:
   zerotrust-net:
     driver: bridge
@@ -293,3 +325,5 @@ volumes:
   spire-agent-data:
   spire-agent-socket:
   portal-data:
+
+
