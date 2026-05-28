@@ -119,12 +119,14 @@ services:
       REGISTRATIONS_URL: "http://registrations-service:5005"
       # critical_violation 시 spire-server entry 를 docker exec 로 삭제하기 위해 필요
       SPIRE_SERVER_CONTAINER: "spire-server"
+      REVOCATION_DIR: "/revoked"
     volumes:
       - spire-agent-socket:/run/spire/agent/public:ro
       # 게이트웨이가 critical_violation 탐지 시 spire-server CLI 를 호출해
       # entry 를 삭제할 수 있도록 docker 데몬 소켓을 마운트한다.
       # (시연 편의를 위한 구성이며, 운영에서는 별도 revoker 사이드카 권장)
       - /var/run/docker.sock:/var/run/docker.sock
+      - revocation-data:/revoked:ro
     ports:
       - "5000:5000"
     depends_on:
@@ -298,6 +300,7 @@ services:
       com.guardians.service: "revocation-store"
     environment:
       SERVICE_NAME: "revocation-store"
+      REVOCATION_DIR: "/revoked"
       SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/revocation-store"
       SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
       SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
@@ -309,12 +312,122 @@ services:
     volumes:
       - spire-agent-socket:/run/spire/agent/public:ro
       - portal-data:/data
+      - revocation-data:/revoked
     depends_on:
       - spire-agent
       - opa
     networks:
       - zerotrust-net
     restart: unless-stopped
+
+  # profile-replica (clean standby - 폐지 시 우회 대상, 독립 SPIFFE ID)
+  profile-replica:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/profile-service/Dockerfile
+    container_name: profile-replica
+    labels:
+      com.guardians.service: "profile-replica"
+    environment:
+      SERVICE_NAME: "profile-replica"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/profile-replica"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # grades-replica (clean standby - 폐지 시 우회 대상, 독립 SPIFFE ID)
+  grades-replica:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/grades-service/Dockerfile
+    container_name: grades-replica
+    labels:
+      com.guardians.service: "grades-replica"
+    environment:
+      SERVICE_NAME: "grades-replica"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/grades-replica"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # enrollments-replica (clean standby - 폐지 시 우회 대상, 독립 SPIFFE ID)
+  enrollments-replica:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/enrollments-service/Dockerfile
+    container_name: enrollments-replica
+    labels:
+      com.guardians.service: "enrollments-replica"
+    environment:
+      SERVICE_NAME: "enrollments-replica"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/enrollments-replica"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
+  # registrations-replica (clean standby - 폐지 시 우회 대상, 독립 SPIFFE ID)
+  registrations-replica:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/registrations-service/Dockerfile
+    container_name: registrations-replica
+    labels:
+      com.guardians.service: "registrations-replica"
+    environment:
+      SERVICE_NAME: "registrations-replica"
+      SERVICE_SPIFFE_ID: "spiffe://guardians.local/service/registrations-replica"
+      SPIRE_AGENT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      SPIFFE_ENDPOINT_SOCKET: "unix:///run/spire/agent/public/api.sock"
+      REQUIRE_SVID: "true"
+      OPA_URL: "http://opa:8181"
+      DATABASE_URL: "sqlite:////data/portal.db"
+    volumes:
+      - spire-agent-socket:/run/spire/agent/public:ro
+      - portal-data:/data
+    depends_on:
+      - spire-agent
+      - opa
+    networks:
+      - zerotrust-net
+    restart: unless-stopped
+
 
 networks:
   zerotrust-net:
@@ -325,5 +438,6 @@ volumes:
   spire-agent-data:
   spire-agent-socket:
   portal-data:
+  revocation-data:
 
 

@@ -51,6 +51,12 @@ register "enrollments"
 # 6. Registrations (등록금납부조회)
 register "registrations"
 
+# 7. Replica standby (failover 대상, 독립 SPIFFE ID)
+register "profile-replica"
+register "grades-replica"
+register "enrollments-replica"
+register "registrations-replica"
+
 echo ""
 echo "=== 등록 완료 ==="
 /opt/spire/bin/spire-server entry show

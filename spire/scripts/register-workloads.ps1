@@ -19,7 +19,8 @@ $SPIFFE_DOMAIN = "spiffe://guardians.local"
 $AGENT_SPIFFE  = "$SPIFFE_DOMAIN/agent/docker"
 
 # Service name === label value === SPIFFE ID suffix
-$services = @("gateway", "auth", "profile", "grades", "enrollments", "registrations")
+$services = @("gateway", "auth", "profile", "grades", "enrollments", "registrations",
+              "profile-replica", "grades-replica", "enrollments-replica", "registrations-replica")
 
 Write-Host "=== Guardians Zero-Trust Portal: Workload Registration ===" -ForegroundColor Cyan
 
