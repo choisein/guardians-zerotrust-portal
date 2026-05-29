@@ -22,20 +22,8 @@ default allow := false
 
 default critical_violation := false
 
-# ── 요청 출처 분류 ──────────────────────────────────────────
-is_external_request if {
-	input.source == "gateway"
-}
-
-is_internal_service_call if {
-	input.source == "service"
-	input.caller_service
-}
-
-# ── 외부 요청 (Gateway) ─────────────────────────────────────
 # 학생: 본인 성적만
 allow if {
-	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_student
@@ -45,19 +33,10 @@ allow if {
 
 # 관리자: 전체 조회 가능
 allow if {
-	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_admin
 	not is_suspicious_pattern
-}
-
-# ── 내부 요청 (서비스 간 호출) ──────────────────────────────
-# Enrollment Service: 선수과목/수강 확인을 위해 성적 조회 (읽기만)
-allow if {
-	is_internal_service_call
-	input.caller_service == "enrollments-service"
-	common.is_read_method
 }
 
 # ── 이상 행동 탐지 (deny, entry 유지) ───────────────────────
