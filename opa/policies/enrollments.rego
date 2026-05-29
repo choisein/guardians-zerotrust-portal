@@ -20,20 +20,8 @@ default allow := false
 
 default critical_violation := false
 
-# ── 요청 출처 분류 ──────────────────────────────────────────
-is_external_request if {
-	input.source == "gateway"
-}
-
-is_internal_service_call if {
-	input.source == "service"
-	input.caller_service
-}
-
-# ── 외부 요청 (Gateway) ─────────────────────────────────────
 # 학생: 본인의 수강내역만 조회
 allow if {
-	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_student
@@ -42,19 +30,9 @@ allow if {
 
 # 관리자: 모든 학생의 수강내역 조회
 allow if {
-	is_external_request
 	common.is_logged_in
 	common.is_read_method
 	common.is_admin
-}
-
-# ── 내부 요청 (서비스 간 호출) ──────────────────────────────
-# Registration Service: 등록금 산정(수강 학점)을 위해 수강내역 확인 (읽기만)
-# → 호출 그래프상 enrollments 를 호출할 수 있는 유일한 내부 서비스
-allow if {
-	is_internal_service_call
-	input.caller_service == "registrations-service"
-	common.is_read_method
 }
 
 # ── 서비스 간 호출 위반 (critical_violation → SVID 폐지) ─────
