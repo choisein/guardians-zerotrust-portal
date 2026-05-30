@@ -22,6 +22,7 @@ default critical_violation := false
 
 # 학생: 본인의 수강내역만 조회
 allow if {
+	common.is_from_gateway
 	common.is_logged_in
 	common.is_read_method
 	common.is_student
@@ -30,9 +31,18 @@ allow if {
 
 # 관리자: 모든 학생의 수강내역 조회
 allow if {
+	common.is_from_gateway
 	common.is_logged_in
 	common.is_read_method
 	common.is_admin
+}
+
+# ── 내부 요청 (서비스 간 호출) ──────────────────────────────
+# Registration Service: 등록금 산정(수강 학점)을 위해 수강내역 조회 (읽기만)
+allow if {
+	common.is_internal_service_call
+	input.caller_service == "registrations-service"
+	common.is_read_method
 }
 
 # ── 서비스 간 호출 위반 (critical_violation → SVID 폐지) ─────
@@ -40,19 +50,19 @@ allowed_internal_callers := {"registrations-service"}
 
 # [시나리오 A·B] 호출 그래프 이탈: 허가되지 않은 서비스의 내부 호출
 critical_violation if {
-	is_internal_service_call
+	common.is_internal_service_call
 	not input.caller_service in allowed_internal_callers
 }
 
 # [시나리오 D] 메서드 초과: 허가된 서비스라도 읽기 외(쓰기) 시도
 critical_violation if {
-	is_internal_service_call
+	common.is_internal_service_call
 	input.caller_service in allowed_internal_callers
 	not common.is_read_method
 }
 
 # [시나리오 E] 대량 추출: 내부 서비스의 단시간 대량 호출 (임계값 조정 가능)
 critical_violation if {
-	is_internal_service_call
+	common.is_internal_service_call
 	input.context.recent_request_count > 20
 }
