@@ -4,6 +4,72 @@ SPIRE(SPIFFE) + OPA 기반 마이크로서비스 제로트러스트 학생 포�
 각 서비스는 독립된 SVID 신원을 갖고, 모든 요청은 **SVID 검증 + OPA 인가**를 거친다.
 핵심 목표는 **침해된 서비스의 횡적 이동(lateral movement)을 SVID 즉시 폐지로 차단**하는 것.
 
+## 시스템 아키텍처 흐름
+
+평상시 요청 흐름:
+
+```
+                       ┌─────────────────────┐
+                       │       Browser       │
+                       └──────────┬──────────┘
+                                  │ HTTPS + session cookie
+                                  ▼
+╔══════════════════════════════════════════════════════════════════╗
+║          Gateway  :5000  (spiffe://.../service/gateway)          ║
+║   경로 라우팅 + audience=대상 서비스로 SVID 발급해 X-SVID 첨부      ║
+╚════╤═══════════════╤══════════════╤═══════════════╤══════════════╝
+     │               │              │               │
+     ▼               ▼              ▼               ▼
+ ┌────────┐    ┌─────────┐    ┌────────┐    ┌─────────────┐    ┌──────────────┐
+ │  auth  │    │ profile │    │ grades │    │ enrollments │    │registrations │
+ │ :5001  │    │  :5002  │    │ :5003  │    │   :5004     │    │   :5005      │
+ └────────┘    └─────────┘    └────────┘    └─────────────┘    └──────────────┘
+
+각 서비스 미들웨어:
+  ① X-SVID 검증 + blocklist 확인
+  ② source / caller_service 파생
+  ③ Flask 세션 확인
+  ④ OPA(:8181) 평가
+
+제어 평면:
+  ┌────────────────┐   ┌────────────────┐   ┌────────────────┐
+  │  SPIRE Server  │◀─▶│  SPIRE Agent   │   │   OPA :8181    │
+  │  (entry CRUD)  │   │ (Workload API) │   │  (rego policy) │
+  └────────────────┘   └────────────────┘   └────────────────┘
+```
+
+critical_violation 폐지 + Failover 시퀀스:
+
+```
+[1] 횡적 이동 시도 (예: profile → grades)
+    profile  ──자기 SVID(aud=grades)──▶  grades
+
+[2] grades 측 OPA 가 critical_violation 판정
+                │
+                ▼
+       middleware 가 두 가지를 동시에 수행
+        ├─ revoke_entry(profile)        ← SPIRE entry 삭제 + 블록리스트
+        └─ POST http://revocation-store:6000/revoke
+
+[3] revocation-store 가 공유 볼륨에 기록
+                │
+                ▼
+        revocation-data 볼륨
+        └─ profile.revoked
+
+[4] 이후 브라우저 → Gateway 요청
+                │
+       Gateway 가 revocation-data 확인
+                │
+                ▼
+    /profile 트래픽을 profile-replica 로 우회
+    SVID audience = spiffe://.../service/profile-replica
+                │
+                ▼
+        profile-replica (독립 SPIFFE ID, 정상 검증 통과)
+        → 사용자에게 정상 응답 (포털 가용성 유지)
+```
+
 ## 서비스 / SPIFFE ID
 
 | 서비스 | 기능 | SPIFFE ID | 포트 |
