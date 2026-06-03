@@ -31,6 +31,18 @@ def _resolve_student_id():
     return profile.student_id, None
 
 
+@grades_bp.route("/grades", methods=["POST", "PUT", "DELETE", "PATCH"])
+@zero_trust_required(policy_package="guardians/grades")
+def write_grades():
+    """학생 쓰기 시도 차단 데모용.
+
+    학생 권한으로 들어오면 OPA 의 is_suspicious_pattern (student + not is_read_method)
+    이 발동해 미들웨어 단계에서 403 deny 로 차단된다. 관리자 역시 외부 allow 규칙이
+    is_read_method 를 요구하므로 deny. 즉 이 함수 본문은 정책상 도달할 수 없다.
+    """
+    return jsonify({"error": "쓰기는 정책상 허용되지 않습니다."}), 403
+
+
 @grades_bp.route("/grades", methods=["GET"])
 @zero_trust_required(policy_package="guardians/grades")
 def get_grades():

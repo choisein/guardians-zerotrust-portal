@@ -68,7 +68,7 @@ def reset_revocations():
 
 # ── S1. 정상 본인 조회 (allow) — 기준선 ───────────────────────
 banner("S1. 정상 학생이 본인 정보 조회 (기대: 전부 200 allow)")
-s = login("20230001", "password")
+s = login("user_202300001", "test1234")
 show_response("학적 조회", s.get(f"{GATEWAY}/api/student/profile"))
 show_response("성적 조회", s.get(f"{GATEWAY}/api/student/grades"))
 show_response("수강내역 조회", s.get(f"{GATEWAY}/api/student/enrollments"))
@@ -83,13 +83,13 @@ show_response("미인증 학적 조회", anon.get(f"{GATEWAY}/api/student/profil
 banner("S3. 타 학번 성적 조회 시도 (기대: 403 deny, entry 유지)")
 show_response("본인 성적(정상)", s.get(f"{GATEWAY}/api/student/grades"))
 show_response("타 학번 성적(공격)",
-              s.get(f"{GATEWAY}/api/student/grades?student_id=20230099"))
+              s.get(f"{GATEWAY}/api/student/grades?student_id=user_201800002"))
 print("  → 공격 직후에도 본인 조회는 다시 통과해야 함 (deny 는 신원 유지)")
 show_response("공격 직후 본인 성적 재조회", s.get(f"{GATEWAY}/api/student/grades"))
 
 # ── S4. 학생 쓰기 시도 (deny) ────────────────────────────────
 banner("S4. 학생이 성적 변경(POST) 시도 (기대: 403 deny)")
-attacker = login("20230002", "password")
+attacker = login("user_202300001", "test1234")
 show_response("정상 본인 성적 조회", attacker.get(f"{GATEWAY}/api/student/grades"))
 show_response("성적 수정 시도(공격)",
               attacker.post(f"{GATEWAY}/api/student/grades",
@@ -97,6 +97,9 @@ show_response("성적 수정 시도(공격)",
 
 # ── S5. 단시간 대량 조회 (deny, 이상행동, entry 유지) ─────────
 banner("S5. 10초 내 25회 대량 조회 (기대: 21회째부터 403, 이후 회복)")
+# 직전 시나리오의 요청이 10초 슬라이딩 윈도우에 남아 있어 카운터가 누적되므로 리셋 대기
+print("  카운터 리셋 대기 11초 ...")
+time.sleep(11)
 print("  25회 연속 요청 시작...")
 allowed, denied = 0, 0
 for _ in range(25):
@@ -114,9 +117,9 @@ show_response("리셋 후 정상 조회 가능 여부", s.get(f"{GATEWAY}/api/st
 
 # ── S6. 관리자 정상 전체 조회 (allow) ────────────────────────
 banner("S6. 관리자 전체 조회 vs 학생 타인 조회 (기대: admin 200 / student 403)")
-admin = login("admin1", "admin")
+admin = login("admin_001", "test1234")
 show_response("관리자 → 학생 학적 조회",
-              admin.get(f"{GATEWAY}/api/student/profile?student_id=20230001"))
+              admin.get(f"{GATEWAY}/api/student/profile?student_id=202300001"))
 show_response("학생 → 타 학생 학적 조회(대조)",
               s.get(f"{GATEWAY}/api/student/profile?student_id=20230002"))
 
@@ -138,7 +141,7 @@ reset_revocations()
 
 # ── S8. 허용된 내부 호출 (allow) — 계층 2 기준선 ─────────────
 banner("S8. 허용된 서비스 간 내부 호출 (기대: 전부 200 allow)")
-internal = login("20230001", "password")
+internal = login("user_202300001", "test1234")
 show_response("enrollments → grades",
               internal.get(f"{GATEWAY}/api/student/enrollments/internal/grades"))
 show_response("enrollments → profile",
