@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Zero-Trust 정책 시연</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0; padding: 28px; background: #f5f5f7; color: #1d1d1f;
+    }
+    h1 { margin: 0 0 4px 0; font-size: 28px; }
+    .lead { color: #6e6e73; margin: 0 0 28px 0; }
+    .scenario {
+      background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .scenario h2 { margin: 0 0 4px 0; font-size: 22px; }
+    .scenario .desc { color: #6e6e73; margin: 0 0 18px 0; font-size: 14px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel {
+      border: 2px solid #e5e5ea; border-radius: 10px; padding: 18px;
+      transition: border-color 0.15s;
+    }
+    .panel.normal { border-color: #34c759; }
+    .panel.attack { border-color: #ff3b30; }
+    .panel h3 { margin: 0 0 6px 0; font-size: 18px; }
+    .normal h3 { color: #248a3d; }
+    .attack h3 { color: #c70015; }
+    .label { font-size: 13px; color: #6e6e73; margin-bottom: 6px; }
+    .endpoint {
+      font-family: "SF Mono", Consolas, Monaco, monospace; font-size: 12px;
+      background: #f5f5f7; padding: 8px 10px; border-radius: 6px;
+      margin: 6px 0 12px 0; word-break: break-all;
+    }
+    button {
+      width: 100%; padding: 11px 16px; border: none; border-radius: 8px;
+      color: white; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .normal button { background: #34c759; }
+    .attack button { background: #ff3b30; }
+    .verify button { background: #007aff; max-width: 280px; }
+    button:hover { filter: brightness(0.95); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .result {
+      background: #1d1d1f; color: #d1d1d6; padding: 12px 14px; border-radius: 6px;
+      font-family: "SF Mono", Consolas, monospace; font-size: 12px;
+      margin-top: 12px; max-height: 240px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-word; line-height: 1.5;
+    }
+    .status { font-weight: 700; font-size: 13px; }
+    .s-200 { color: #30d158; }
+    .s-403, .s-401, .s-500, .s-502 { color: #ff453a; }
+    .empty { color: #8e8e93; font-style: italic; }
+    .verify {
+      margin-top: 18px; padding: 14px 16px; background: #f5f5f7; border-radius: 10px;
+    }
+    .verify strong { display: block; margin-bottom: 8px; }
+    .verify .note { font-size: 12px; color: #6e6e73; margin-top: 8px; }
+    .badge {
+      display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      vertical-align: middle; margin-left: 6px;
+    }
+    .badge.user { background: #e5f1ff; color: #007aff; }
+    .badge.workload { background: #fff0e1; color: #ff9500; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .user-info { font-size: 13px; color: #6e6e73; }
+    a { color: #007aff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>Guardians Zero-Trust 정책 시연</h1>
+      <p class="lead">S3·S9 시나리오 — 정상 요청과 공격 요청을 나란히 비교</p>
+    </div>
+    <div class="user-info">
+      <span id="user-display">세션 확인 중...</span> · <a href="/templates/dashboard.html">대시보드</a>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="scenario">
+    <h2>S3. 사용자 계층 <span class="badge user">USER LAYER</span></h2>
+    <p class="desc">학생은 자기 데이터만 볼 수 있어야 한다. 같은 URL, 다른 <code>student_id</code> 파라미터로 비교.</p>
+    <div class="split">
+      <div class="panel normal">
+        <h3>✓ 정상 요청</h3>
+        <div class="label">본인 성적 조회</div>
+        <div class="endpoint">GET /api/student/grades</div>
+        <button onclick="run(this, '/api/student/grades', 'res-s3n')">실행</button>
+        <div class="result" id="res-s3n"><span class="empty">결과 대기 중...</span></div>
+      </div>
+      <div class="panel attack">
+        <h3>✗ 공격 요청</h3>
+        <div class="label">타 학번 성적 조회 (수평 권한 상승)</div>
+        <div class="endpoint">GET /api/student/grades?student_id=20230002</div>
+        <button onclick="run(this, '/api/student/grades?student_id=20230002', 'res-s3a')">실행</button>
+        <div class="result" id="res-s3a"><span class="empty">결과 대기 중...</span></div>
+      </div>
+    </div>
+    <div class="verify">
+      <strong>판정 확인 — 공격 직후 본인 조회 (entry 유지 입증)</strong>
+      <button onclick="run(this, '/api/student/grades', 'res-s3v')">검증 실행</button>
+      <div class="result" id="res-s3v" style="margin-top:10px"><span class="empty">결과 대기 중...</span></div>
+      <p class="note">200이 나오면 → 신원(SVID/entry)은 유지된 채 접근만 차단됐다는 증거(deny ≠ critical)</p>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="scenario" style="margin-top: 256px;">
+    <h2>S9. 워크로드 계층 — 횡적 이동 <span class="badge workload">WORKLOAD LAYER · ★</span></h2>
+    <p class="desc">서비스가 자기 SVID로 다른 서비스를 직접 호출. 호출 그래프 안쪽(허용) vs 이탈(critical → SVID 폐지 → replica failover).</p>
+    <div class="split">
+      <div class="panel normal">
+        <h3>✓ 정상 요청 (허용 엣지)</h3>
+        <div class="label">enrollments → grades (선수과목 확인)</div>
+        <div class="endpoint">GET /api/student/enrollments/internal/grades</div>
+        <button onclick="run(this, '/api/student/enrollments/internal/grades', 'res-s9n')">실행</button>
+        <div class="result" id="res-s9n"><span class="empty">결과 대기 중...</span></div>
+      </div>
+      <div class="panel attack">
+        <h3>✗ 공격 요청 (그래프 이탈)</h3>
+        <div class="label">profile → grades (횡적 이동 시도)</div>
+        <div class="endpoint">GET /api/student/profile/internal/grades</div>
+        <button onclick="run(this, '/api/student/profile/internal/grades', 'res-s9a')">실행</button>
+        <div class="result" id="res-s9a"><span class="empty">결과 대기 중...</span></div>
+      </div>
+    </div>
+    <div class="verify">
+      <strong>판정 확인 — 폐지 후 본인 학적 조회 (replica failover 입증)</strong>
+      <button onclick="run(this, '/api/student/profile', 'res-s9v')">검증 실행</button>
+      <div class="result" id="res-s9v" style="margin-top:10px"><span class="empty">결과 대기 중...</span></div>
+      <p class="note">200이 나오면 → profile SVID가 폐지됐지만 게이트웨이가 profile-replica로 우회해 가용성 유지. 게이트웨이 로그에 <code>[FAILOVER] profile 폐지됨 → ...</code> 확인 가능.</p>
+    </div>
+  </div>
+
+  <script>
+    function statusLabel(status) {
+      if (status === 200) return "✓ ALLOW";
+      if (status === 403) return "✗ DENY / CRITICAL";
+      if (status === 401) return "✗ UNAUTHORIZED";
+      if (status >= 500) return "✗ SERVER ERROR";
+      return "";
+    }
+
+    async function run(btn, path, resultId) {
+      const el = document.getElementById(resultId);
+      btn.disabled = true;
+      const oldText = btn.textContent;
+      btn.textContent = "요청 중...";
+      el.innerHTML = '<span class="empty">요청 중...</span>';
+      try {
+        const res = await fetch(path, { credentials: "include" });
+        let body;
+        try { body = await res.json(); }
+        catch { body = await res.text(); }
+        const cls = "s-" + res.status;
+        const formatted = typeof body === "object"
+          ? JSON.stringify(body, null, 2)
+          : String(body).slice(0, 1200);
+        el.innerHTML =
+          '<span class="status ' + cls + '">' + res.status + " " + statusLabel(res.status) + "</span>\n\n" +
+          formatted;
+      } catch (err) {
+        el.innerHTML = '<span class="status s-500">ERROR</span>\n' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    }
+
+    // 세션 확인 (로그인 안 되어 있으면 안내)
+    fetch("/api/auth/session", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const el = document.getElementById("user-display");
+        if (data && data.user_id) {
+          el.textContent = "로그인: " + data.user_id;
+        } else {
+          el.innerHTML = '<a href="/">로그인 필요</a>';
+        }
+      })
+      .catch(() => {
+        document.getElementById("user-display").innerHTML = '<a href="/">로그인 필요</a>';
+      });
+  </script>
+</body>
+</html>
