@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Guardians — Blocked Events Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0f1724;
+      --card: #0b1220;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --glass: rgba(255,255,255,0.03);
+      --panel-radius: 12px;
+      --max-width: 1100px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background: linear-gradient(180deg,#071023 0%, #071a2a 100%); color:#e6eef8; display:flex; justify-content:center; padding:28px;}
+    .wrap{width:100%;max-width:var(--max-width);}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    h1{font-size:20px;margin:0 0 2px 0;}
+    .subtitle{color:var(--muted);font-size:13px;}
+    .controls{display:flex;gap:8px;align-items:center;}
+    .btn{background:var(--accent);color:#022; padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:500}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px;border-radius:var(--panel-radius);box-shadow:0 6px 18px rgba(2,6,23,0.6); margin-bottom:16px;}
+    
+    /* 변경: 차트 그리드를 1fr 1fr로 변경 */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+    
+    .chart-wrap{height:352px;padding:8px;border-radius:10px;background:var(--glass); display:flex;flex-direction:column;}
+    .small{font-size:12px;color:var(--muted)}
+    .meta{display:flex;gap:12px;align-items:center}
+    .badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-size:13px}
+    
+    /* 새로운: 풀스크린 필터 섹션 */
+    .filters-section{width:100%; width: 1070px;}
+    .filters-section .filter-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+    
+    .table-wrap{max-height:380px; overflow:auto; border-radius:10px; background:rgba(255,255,255,0.02); padding:8px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;color:#cfe8ff}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03)}
+    th{font-size:12px;color:var(--muted);position:sticky;top:0;background:rgba(26, 26, 26, 0.95);z-index:10;backdrop-filter:blur(5px);}
+    tr:hover td{background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent)}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:600;font-size:12px}
+    .policy-OWNERSHIP_CHECK{background:#ffb4a2;color:#3b0b00}
+    .policy-AUTHENTICATION_REQUIRED{background:#c7d2fe;color:#0b0f3b}
+    .policy-NETWORK_ISOLATION{background:#4aa481;color:#0b0f3b}
+    .policy-CRITICAL_VIOLATION{background:#ceff78;color:#0b0f3b}
+    .policy-RBAC_WRITE_DENIED{background:#f1a9e3;color:#0b0f3b}
+    .policy-RATE_LIMITING{background:#cf95f1;color:#0b0f3b}
+    .details{margin-top:12px;background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;color:#dbeafe;font-family:monospace;font-size:13px;white-space:pre-wrap;max-height:260px;overflow:auto}
+    .import-area{display:flex;gap:8px;flex-direction:column}
+    textarea{width:100%;min-height:120px;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:#dbeafe;padding:10px;border-radius:8px;resize:vertical}
+    .row{display:flex;gap:8px;align-items:center}
+    .polling-status{font-size:11px;color:#86efac;font-weight:600;letter-spacing:0.5px}
+    footer{margin-top:10px;color:var(--muted);font-size:12px;text-align:center}
+    @media(max-width:900px){ .charts-grid{grid-template-columns:1fr} .chart-wrap{height:240px} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Blocked Events Dashboard</h1>
+        <div class="subtitle">시뮬레이션 기반 차단 이벤트 시각화 — 요약 · 상세 · JSON 임포트</div>
+      </div>
+      <div class="controls">
+        <div class="meta small">
+          <div class="badge" id="totalHits">Total: —</div>
+          <div class="small" id="lastUpdated">Updated: —</div>
+          <div class="polling-status" id="pollingStatus">⊙ idle</div>
+        </div>
+        <button class="btn" id="refreshBtn">새로고침</button>
+        <button class="btn ghost" id="importToggle">JSON 임포트</button>
+      </div>
+    </header>
+
+    <!-- 변경: 2열 차트 그리드 -->
+    <div class="charts-grid">
+      <div class="chart-wrap panel">
+        <strong>Top Policies</strong>
+        <canvas id="barChart" style="flex:1;"></canvas>
+      </div>
+
+      <div class="chart-wrap panel">
+        <strong>24h Events</strong>
+        <canvas id="lineChart" style="flex:1;"></canvas>
+      </div>
+    </div>
+
+    <!-- 새로운: 풀스크린 필터 섹션 -->
+    <div class="panel filters-section">
+      <strong>Quick Filters</strong>
+      <div class="filter-buttons">
+        <button class="btn ghost" data-filter="ALL">All</button>
+        <button class="btn" data-filter="OWNERSHIP_CHECK">OWNERSHIP_CHECK</button>
+        <button class="btn" data-filter="NETWORK_ISOLATION">NETWORK_ISOLATION</button>
+        <button class="btn" data-filter="CRITICAL_VIOLATION">CRITICAL_VIOLATION</button>
+        <button class="btn" data-filter="AUTHENTICATION_REQUIRED">AUTHENTICATION_REQUIRED</button>
+        <button class="btn" data-filter="RBAC_WRITE_DENIED">RBAC_WRITE_DENIED</button>
+        <button class="btn" data-filter="RATE_LIMITING">RATE_LIMITING</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <strong>Events</strong>
+      <div style="margin-top:8px;margin-bottom:8px" class="row">
+        <input id="search" placeholder="search block_id / user_id / label / policy" style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:#dbeafe">
+        <select id="rowsPerPage" style="background:transparent;color:#dbeafe;border-radius:8px;border:1px solid rgba(255,255,255,0.03);padding:8px">
+          <option value="25">25</option><option value="50" selected>50</option><option value="100">100</option>
+        </select>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <table id="eventsTable">
+          <thead><tr><th>time</th><th>block_id</th><th>label</th><th>policy / reason</th><th>user</th><th>http</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="details" class="details" style="display:none"></div>
+    </div>
+
+    <div class="panel import-area" id="importPanel" style="display:none">
+      <strong>JSON Import</strong>
+      <div class="small">Elasticsearch bulk 포맷(예: {"index":{}} 라인 포함) 혹은 단순 개별 JSON 라인 모두 허용.</div>
+      <textarea id="ndjsonInput" placeholder='여기에 붙여넣기 하세요 — 예: {"index":{}}&#10;{"block_id":"...","policy":{...}}'></textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="importBtn">Import</button>
+        <button class="btn ghost" id="clearImport">Clear</button>
+        <div style="flex:1"></div>
+        <div class="small">Events loaded: <span id="loadedCount">0</span></div>
+      </div>
+    </div>
+
+    <footer>💡 Tip: attack_demo.py 실행 중 대시보드가 자동으로 실시간 이벤트를 반영합니다 (2초 폴링). NDJSON 임포트로 수동 로드도 가능합니다.</footer>
+  </div>
+
+<script>
+(() => {
+  let events = [];
+  let filtered = [];
+  let charts = {};
+  let isPolling = false;
+  let lastFileMtime = null;
+
+  const elems = {
+    totalHits: document.getElementById('totalHits'),
+    lastUpdated: document.getElementById('lastUpdated'),
+    pollingStatus: document.getElementById('pollingStatus'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    importToggle: document.getElementById('importToggle'),
+    importPanel: document.getElementById('importPanel'),
+    ndjsonInput: document.getElementById('ndjsonInput'),
+    importBtn: document.getElementById('importBtn'),
+    clearImport: document.getElementById('clearImport'),
+    loadedCount: document.getElementById('loadedCount'),
+    eventsTableBody: document.querySelector('#eventsTable tbody'),
+    details: document.getElementById('details'),
+    search: document.getElementById('search'),
+    rowsPerPage: document.getElementById('rowsPerPage'),
+    tableWrap: document.getElementById('tableWrap'),
+  };
+
+  const ctxBar = document.getElementById('barChart').getContext('2d');
+  const ctxLine = document.getElementById('lineChart').getContext('2d');
+
+  function createChartIfNeeded() {
+    if (!charts.bar) charts.bar = new Chart(ctxBar, {type:'bar',data:{labels:[],datasets:[{label:'events',data:[],backgroundColor:'#60a5fa'}]},options:{onClick:barClick,responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    if (!charts.line) charts.line = new Chart(ctxLine, {type:'line',data:{labels:[],datasets:[{label:'events/hr',data:[],borderColor:'#fb7185',backgroundColor:'rgba(251,113,133,0.12)',fill:true}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+  }
+
+  function barClick(e, elements) {
+    if (!elements.length) return;
+    const idx = elements[0].index;
+    const policy = charts.bar.data.labels[idx];
+    applyFilter(policy);
+  }
+
+  function applyFilter(policy) {
+    if (policy === 'UNKNOWN') policy = null;
+    filtered = events.filter(ev => (policy ? (ev.policy && (ev.policy.policy_id===policy || ev.policy.policy_id===policy)) : true));
+    renderTable();
+  }
+  function applyFilterByReason(reason) {
+    filtered = events.filter(ev => (ev.policy && ev.policy.reason === reason));
+    renderTable();
+  }
+
+  function refreshUIInfo() {
+    elems.totalHits.textContent = 'Total: ' + events.length;
+    elems.loadedCount.textContent = events.length;
+    elems.lastUpdated.textContent = 'Updated: ' + new Date().toLocaleString();
+  }
+
+  function computeSummaries(evtList) {
+    const policies = {};
+    const reasons = {};
+    const hourly = {};
+    evtList.forEach(ev => {
+      const p = ev.policy && ev.policy.policy_id ? ev.policy.policy_id : 'UNKNOWN';
+      const r = ev.policy && ev.policy.reason ? ev.policy.reason : 'unknown';
+      policies[p] = (policies[p]||0)+1;
+      reasons[r] = (reasons[r]||0)+1;
+      const t = ev.timestamp ? new Date(ev.timestamp) : new Date();
+      const hour = new Date(t.getFullYear(),t.getMonth(),t.getDate(),t.getHours()).toISOString();
+      hourly[hour] = (hourly[hour]||0)+1;
+    });
+    return {policies,reasons,hourly};
+  }
+
+  function sortEntries(obj) {
+    return Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+  }
+
+  function updateCharts() {
+    createChartIfNeeded();
+    const s = computeSummaries(events);
+    const topPolicies = sortEntries(s.policies);
+    charts.bar.data.labels = topPolicies.map(x=>x[0]);
+    charts.bar.data.datasets[0].data = topPolicies.map(x=>x[1]);
+    charts.bar.update();
+
+    const topReasons = sortEntries(s.reasons);
+
+    const hourlyKeys = Object.keys(s.hourly);
+    let hours = [];
+    if (hourlyKeys.length) {
+      const now = new Date();
+      for (let i=23;i>=0;i--){
+        const d = new Date(now.getTime() - i*3600*1000);
+        hours.push(new Date(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours()).toISOString());
+      }
+    } else {
+      const now = new Date();
+      for (let i=5;i>=0;i--){
+        const d = new Date(now.getTime() - i*3600*1000);
+        hours.push(new Date(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours()).toISOString());
+      }
+    }
+    const counts = hours.map(h => s.hourly[h]||0);
+    charts.line.data.labels = hours.map(h => (new Date(h)).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit'}));
+    charts.line.data.datasets[0].data = counts;
+    charts.line.update();
+  }
+
+  function renderTable() {
+    const rowsPerPage = parseInt(elems.rowsPerPage.value,10);
+    const q = elems.search.value.trim().toLowerCase();
+    let list = filtered.length ? filtered.slice() : events.slice();
+    if (q) {
+      list = list.filter(ev => {
+        return (ev.block_id && ev.block_id.toLowerCase().includes(q)) ||
+               (ev.user_metadata && ev.user_metadata.user_id && String(ev.user_metadata.user_id).toLowerCase().includes(q)) ||
+               (ev.label && ev.label.toLowerCase().includes(q)) ||
+               (ev.scenario && ev.scenario.toLowerCase().includes(q)) ||
+               (ev.policy && ev.policy.policy_id && ev.policy.policy_id.toLowerCase().includes(q));
+      });
+    }
+    const slice = list.slice(0, rowsPerPage);
+    const tbody = elems.eventsTableBody;
+    tbody.innerHTML = '';
+    slice.forEach(ev => {
+      const tr = document.createElement('tr');
+      const ttime = ev.timestamp ? new Date(ev.timestamp).toLocaleString('ko-KR') : '-';
+      const user = (ev.user_metadata && ev.user_metadata.user_id) ? `${ev.user_metadata.user_id} (${ev.user_metadata.user_role||''})` : '-';
+      const policyText = ev.policy ? `${ev.policy.policy_id} / ${ev.policy.reason||'-'}` : '-';
+      tr.innerHTML = `<td style="min-width:150px">${ttime}</td>
+                      <td style="min-width:120px"><span class="pill">${ev.block_id||'-'}</span></td>
+                      <td>${escapeHtml(ev.label||ev.scenario||'-')}</td>
+                      <td><span class="pill policy-${escapeClass(ev.policy&&ev.policy.policy_id)}">${escapeHtml(policyText)}</span></td>
+                      <td>${escapeHtml(user)}</td>
+                      <td>${ev.http && ev.http.status ? ev.http.status : '-'}</td>`;
+      tr.addEventListener('click',()=> showDetails(ev));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function showDetails(ev) {
+    elems.details.style.display = 'block';
+    elems.details.textContent = JSON.stringify(ev, null, 2);
+    elems.details.scrollTop = 0;
+  }
+
+  function escapeHtml(s){
+    if(!s) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+  function escapeClass(s){ if(!s) return ''; return String(s).replace(/[^a-zA-Z0-9_\-]/g,''); }
+
+  function parseNDJSON(text) {
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const out = [];
+    for (const line of lines){
+      if (/^{\s*"index"\s*:/i.test(line)) continue;
+      try {
+        out.push(JSON.parse(line));
+      } catch(e){ console.warn('failed parse line', line); }
+    }
+    return out;
+  }
+
+  async function pollEventsFile() {
+    try {
+      const statRes = await fetch('/api/file-stat', { cache: 'no-store' });
+      if (!statRes.ok) {
+        elems.pollingStatus.textContent = '⊙ no api';
+        return;
+      }
+
+      const stat = await statRes.json();
+
+      if (!stat.exists || stat.mtime === null) {
+        if (events.length === 0) {
+          elems.pollingStatus.textContent = '⊙ waiting';
+        }
+        return;
+      }
+
+      if (stat.mtime === lastFileMtime && events.length > 0) {
+        elems.pollingStatus.textContent = `✓ ${events.length}`;
+        return;
+      }
+
+      lastFileMtime = stat.mtime;
+      const eventsRes = await fetch('/api/blocked/events', { cache: 'no-store' });
+      if (!eventsRes.ok) {
+        elems.pollingStatus.textContent = '⊙ error';
+        return;
+      }
+
+      const data = await eventsRes.json();
+      const newEvents = data.events || [];
+
+      if (JSON.stringify(newEvents) !== JSON.stringify(events)) {
+        events = newEvents;
+        filtered = [];
+        updateCharts();
+        renderTable();
+        refreshUIInfo();
+        elems.pollingStatus.textContent = `✓ ${events.length}`;
+      }
+    } catch (err) {
+      elems.pollingStatus.textContent = '⊙ error';
+    }
+  }
+
+  async function tryLoadFromApi() {
+    //const candidates = ['/api/blocked/events', '/api/blocked/list', '/api/blocked/raw', '/api/blocked/summary'];
+    const candidates = ['/api/blocked/events'];
+    for (const path of candidates){
+      try {
+        const r = await fetch(path);
+        if (!r.ok) continue;
+        const json = await r.json();
+        if (Array.isArray(json)) {
+          events = json;
+          return {from:path};
+        }
+        if (json && json.summary && (json.summary.policies || json.summary.reasons)) {
+          if (path === '/api/blocked/summary') {
+            const total = json.total_hits || 0;
+            events = [];
+            elems.totalHits.textContent = 'Total: ' + total;
+            elems.loadedCount.textContent = total;
+            return {from:path};
+          }
+        }
+        if (json.hits && Array.isArray(json.hits.hits)) {
+          events = json.hits.hits.map(h => h._source || h);
+          return {from:path};
+        }
+      } catch(e){}
+    }
+    return null;
+  }
+
+  elems.importToggle.addEventListener('click', ()=>{ elems.importPanel.style.display = elems.importPanel.style.display === 'none' ? 'block' : 'none'; });
+  elems.refreshBtn.addEventListener('click', ()=> loadAll());
+  elems.importBtn.addEventListener('click', ()=> {
+    const text = elems.ndjsonInput.value || '';
+    const parsed = parseNDJSON(text);
+    if (!parsed.length) return alert('유효한 JSON 라인이 없습니다.');
+    events = parsed.map(p => p);
+    filtered = [];
+    updateCharts();
+    renderTable();
+    refreshUIInfo();
+    alert('Imported ' + events.length + ' events (local).');
+  });
+  elems.clearImport.addEventListener('click', ()=>{ elems.ndjsonInput.value=''; });
+  elems.search.addEventListener('input', ()=> renderTable());
+  elems.rowsPerPage.addEventListener('change', ()=> renderTable());
+
+  async function loadAll() {
+    elems.details.style.display = 'none';
+    elems.pollingStatus.textContent = '⊙ loading...';
+    const result = await tryLoadFromApi();
+    if (!result) {
+      console.info('No server-side event endpoint found; use NDJSON import to load events locally.');
+    }
+    filtered = [];
+    updateCharts();
+    renderTable();
+    refreshUIInfo();
+  }
+
+  loadAll();
+
+  isPolling = true;
+  const POLL_INTERVAL = 2000;
+  const pollInterval = setInterval(pollEventsFile, POLL_INTERVAL);
+
+  window.__events_dashboard = {
+    getEvents: ()=>events,
+    reload: loadAll,
+    stopPolling: ()=> { clearInterval(pollInterval); isPolling = false; },
+    startPolling: ()=> { if(!isPolling) { isPolling = true; const pi = setInterval(pollEventsFile, POLL_INTERVAL); } },
+  };
+})();
+</script>
+</body>
+</html>
